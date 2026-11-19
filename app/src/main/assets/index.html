@@ -6,19 +6,19 @@
 <title>Odak · Pomodoro</title>
 <script>try{var _t=(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).theme||'auto';
 if(_t==='dark'||(_t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');
-var _c={domates:'214,90,74',okyanus:'61,124,201',orman:'52,140,96',lavanta:'138,99,201',gul:'208,87,127',amber:'196,132,36',grafit:'110,121,134'}[(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).color];
-if(_c){document.documentElement.style.setProperty('--ac',_c);document.documentElement.style.setProperty('--focus','rgb('+_c+')');}}catch(e){}</script>
+var _c=({domates:['Domates','214,90,74','224,138,60','184,69,95'],okyanus:['Okyanus','61,124,201','47,159,179','90,95,196'],orman:['Orman','52,140,96','106,163,63','42,127,132'],lavanta:['Lavanta','138,99,201','176,101,184','95,106,200'],gul:['Gül','208,87,127','224,122,106','168,90,168'],amber:['Amber','196,132,36','201,162,39','184,97,58'],grafit:['Grafit','110,121,134','118,150,140','108,115,152']})[(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).color];
+if(_c){var _s=document.documentElement.style;_s.setProperty('--ac',_c[1]);_s.setProperty('--sh',_c[2]);_s.setProperty('--lg',_c[3]);}}catch(e){}</script>
 <style>
 :root{
   --bg:#f6f3ee; --card:#ffffff; --text:#1f1d1a; --muted:#8a847b; --line:#ebe5dc; --chip:#efeae2;
-  --ac:214,90,74; --focus:#d65a4a; --short:#2f9a8a; --long:#4a72c4;
+  --ac:214,90,74; --sh:224,138,60; --lg:184,69,95; --focus:rgb(var(--ac)); --short:rgb(var(--sh)); --long:rgb(var(--lg));
   --accent:var(--focus); --accent-soft:rgba(var(--ac),.13);
   --r:18px;
 }
 html{color-scheme:light}
 html.dark{color-scheme:dark;--bg:#141312;--card:#1d1b19;--text:#f1ede7;--muted:#9a938a;--line:#2c2926;--chip:#26231f;}
-body[data-ph="short"]{--accent:var(--short);--accent-soft:rgba(47,154,138,.14)}
-body[data-ph="long"]{--accent:var(--long);--accent-soft:rgba(74,114,196,.14)}
+body[data-ph="short"]{--accent:var(--short);--accent-soft:rgba(var(--sh),.14)}
+body[data-ph="long"]{--accent:var(--long);--accent-soft:rgba(var(--lg),.14)}
 body[data-ph="sw"]{--accent:#7a6a58;--accent-soft:rgba(122,106,88,.14)}
 html.dark body[data-ph="sw"]{--accent:#c9b8a3;--accent-soft:rgba(201,184,163,.14)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -98,11 +98,15 @@ html.dark .day.l1{background:rgba(var(--ac),.22)}html.dark .day.l2{background:rg
 .dayInfo .lbl{font-size:12.5px;color:var(--muted)}
 .dayInfo .val{font-size:18px;font-weight:700}
 .theme{margin-top:2px}
+.pdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:1px}
 .colors{display:flex;flex-wrap:wrap;gap:12px;padding:4px 0 8px}
 .colors button{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--muted);width:44px}
 .colors i{width:34px;height:34px;border-radius:50%;display:block;box-shadow:0 0 0 2px var(--card),0 0 0 2px transparent;transition:box-shadow .15s}
 .colors button.on i{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--text)}
 .colors button.on{color:var(--text);font-weight:600}
+.addRow{padding:4px 0 12px}
+.addRow .btn{width:100%}
+#customList:empty{display:none}
 .snd{display:flex;align-items:center;gap:8px;padding:9px 0}
 .snd+.snd{border-top:1px solid var(--line)}
 .snd .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -267,18 +271,13 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
       <select id="sndFocus"></select><button class="play" data-play="sndFocus"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg></button></div>
     <div class="row"><div class="t">Mola bitince</div>
       <select id="sndBreak"></select><button class="play" data-play="sndBreak"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg></button></div>
+    <div id="customList"></div>
+    <div class="addRow"><button class="btn" id="addSnd">+ Ekle</button><input type="file" id="sndFile" accept="audio/*" hidden></div>
     <div class="row"><div class="t">Ses düzeyi</div><input type="range" id="vol" min="0" max="1" step="0.05"></div>
     <div class="row"><div class="t">Titreşim</div><label class="sw"><input type="checkbox" id="vibrate"><i></i></label></div>
   </div>
 
-  <h2>Kendi seslerim</h2>
-  <div class="card">
-    <div id="customList"></div>
-    <div class="row" style="border-top:1px solid var(--line);margin-top:6px"><div class="t">Telefondan ses dosyası ekle<small>MP3, M4A, OGG, WAV · en fazla 5 MB</small></div>
-      <button class="btn" id="addSnd">+ Ekle</button><input type="file" id="sndFile" accept="audio/*" hidden></div>
-  </div>
-  <p class="note">Eklediğin sesler yukarıdaki "Odak bitince" ve "Mola bitince" listelerinde görünür.</p>
-  <p class="note" id="bgNote">Uygulama arka plandayken süre bitince telefonun bildirim sesiyle haber verilir.</p>
+  <p class="note" id="bgNote"></p>
 
   <h2>Veriler</h2>
   <div class="card">
@@ -396,6 +395,26 @@ function playSound(name){
   const s=SOUNDS[name]; if(!s||name==='yok') return; const c=ac(); if(!c) return;
   const m=c.createGain(); m.gain.value=st().vol*0.9; m.connect(c.destination); s.fn(c,m);
 }
+/* arka plan için seçili sesi telefona dosya olarak kaydet */
+function abToB64(ab){ const u=new Uint8Array(ab); let s=''; for(let i=0;i<u.length;i+=0x8000) s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000)); return btoa(s); }
+function wavBytes(ch,sr){ let end=ch.length; while(end>0 && Math.abs(ch[end-1])<0.0005) end--; end=Math.min(ch.length,end+Math.round(sr*0.05));
+  const b=new ArrayBuffer(44+end*2), v=new DataView(b), w=(o,t)=>{ for(let i=0;i<t.length;i++) v.setUint8(o+i,t.charCodeAt(i)); };
+  w(0,'RIFF'); v.setUint32(4,36+end*2,true); w(8,'WAVEfmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,sr,true); v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,'data'); v.setUint32(40,end*2,true);
+  for(let i=0;i<end;i++){ const x=Math.max(-1,Math.min(1,ch[i])); v.setInt16(44+i*2, x<0?x*0x8000:x*0x7fff, true); } return b; }
+async function exportSound(role){
+  if(!NB||!NB.saveSound) return; const key= role==='focus'? st().sndFocus : st().sndBreak;
+  S.exp=S.exp||{}; if(S.exp[role]===key) return;
+  try{
+    let b64='';
+    if(key.startsWith('c:')){ const c=customs.find(x=>'c:'+x.id===key); if(!c) return; b64=abToB64(c.data); }
+    else if(key!=='yok' && SOUNDS[key]){ const sr=22050, OC=window.OfflineAudioContext||window.webkitOfflineAudioContext; if(!OC) return;
+      const oc=new OC(1,sr*6,sr), g=oc.createGain(); g.gain.value=0.9; g.connect(oc.destination); SOUNDS[key].fn(oc,g);
+      const buf=await oc.startRendering(); b64=abToB64(wavBytes(buf.getChannelData(0),sr)); }
+    NB.saveSound(role,b64); S.exp[role]=key; save();
+  }catch(e){}
+}
+function exportAll(){ return exportSound('focus').then(()=>exportSound('break')); }
 function buzz(){ if(!st().vibrate) return; try{ if(NB&&NB.vibrate) NB.vibrate(500); else if(navigator.vibrate) navigator.vibrate([300,150,300]); }catch(e){} }
 
 /* ---------- zamanlayıcı mantığı ---------- */
@@ -440,7 +459,7 @@ function scheduleAlarms(){
     const [np,nc]=nextOf(p,c), auto=autoFor(np);
     const title = p==='focus' ? 'Odak tamamlandı 🍅' : 'Mola bitti';
     const text = (p==='focus' ? (np==='long'?'Uzun mola':'Kısa mola')+' · '+st()[np]+' dk' : 'Odaklanma zamanı · '+st().focus+' dk') + (auto?' (otomatik başladı)':'');
-    try{ NB.schedule(i,end,title,text); }catch(e){}
+    try{ NB.schedule(i,end,title,text, p==='focus'?'focus':'break', st().vol); }catch(e){}
     if(!auto) break; p=np; c=nc; end+=durMs(np);
   }
 }
@@ -513,14 +532,13 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 function renderCustoms(){
   $('#customList').innerHTML = customs.length ? customs.map(c=>'<div class="snd"><div class="t">🎵 '+esc(c.name)+'</div>'+
     '<button class="play" data-cp="'+c.id+'"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg></button>'+
-    '<button class="del" data-cd="'+c.id+'" aria-label="Sil">×</button></div>').join('') : '<div class="note" style="margin:4px 0 2px">Henüz eklenmiş ses yok.</div>';
+    '<button class="del" data-cd="'+c.id+'" aria-label="Sil">×</button></div>').join('') : '';
 }
 const MQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
-const COLORS={domates:['Domates','214,90,74'],okyanus:['Okyanus','61,124,201'],orman:['Orman','52,140,96'],lavanta:['Lavanta','138,99,201'],
-  gul:['Gül','208,87,127'],amber:['Amber','196,132,36'],grafit:['Grafit','110,121,134']};
+const COLORS={domates:['Domates','214,90,74','224,138,60','184,69,95'],okyanus:['Okyanus','61,124,201','47,159,179','90,95,196'],orman:['Orman','52,140,96','106,163,63','42,127,132'],lavanta:['Lavanta','138,99,201','176,101,184','95,106,200'],gul:['Gül','208,87,127','224,122,106','168,90,168'],amber:['Amber','196,132,36','201,162,39','184,97,58'],grafit:['Grafit','110,121,134','118,150,140','108,115,152']};
 function applyTheme(){
-  const c=(COLORS[st().color]||COLORS.domates)[1], R=document.documentElement.style;
-  R.setProperty('--ac',c); R.setProperty('--focus','rgb('+c+')');
+  const P=COLORS[st().color]||COLORS.domates, R=document.documentElement.style;
+  R.setProperty('--ac',P[1]); R.setProperty('--sh',P[2]); R.setProperty('--lg',P[3]);
   const th=st().theme, dark= th==='dark' || (th==='auto' && MQ && MQ.matches);
   document.documentElement.classList.toggle('dark',!!dark);
   try{ if(NB&&NB.setBars) NB.setBars(!!dark); }catch(e){}
@@ -529,11 +547,11 @@ if(MQ){ const f=()=>{ if(st().theme==='auto') applyTheme(); }; MQ.addEventListen
 function renderSettings(){
   const s=st();
   $$('#themeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.th===s.theme));
-  $('#colorRow').innerHTML=Object.entries(COLORS).map(([k,[ad,c]])=>'<button data-c="'+k+'" class="'+(s.color===k?'on':'')+'"><i style="background:rgb('+c+')"></i>'+ad+'</button>').join('');
+  $('#colorRow').innerHTML=Object.entries(COLORS).map(([k,[ad,c,c2,c3]])=>'<button data-c="'+k+'" class="'+(s.color===k?'on':'')+'"><i style="background:conic-gradient(rgb('+c+') 0 50%,rgb('+c2+') 0 75%,rgb('+c3+') 0)"></i>'+ad+'</button>').join('');
   renderCustoms();
   const rows=[['focus','Odak süresi','dk',1,180],['short','Kısa mola','dk',1,60],['long','Uzun mola','dk',1,90],['every','Uzun mola aralığı','odak',2,12]];
   $('#durCard').innerHTML=rows.map(([k,l,u,mn,mx])=>
-    '<div class="row"><div class="t">'+l+(k==='every'?'<small>Kaç odaktan sonra uzun mola verilsin</small>':'')+'</div><div class="step">'+
+    '<div class="row"><div class="t">'+(k!=='every'?'<i class="pdot" style="background:var(--'+k+')"></i>':'')+l+(k==='every'?'<small>Kaç odaktan sonra uzun mola verilsin</small>':'')+'</div><div class="step">'+
     '<button data-k="'+k+'" data-d="-1">−</button><input inputmode="numeric" data-k="'+k+'" data-min="'+mn+'" data-max="'+mx+'" value="'+s[k]+'">'+
     '<button data-k="'+k+'" data-d="1">+</button><span>'+u+'</span></div></div>').join('');
   $('#autoBreak').checked=s.autoBreak; $('#autoFocus').checked=s.autoFocus; $('#vibrate').checked=s.vibrate; $('#vol').value=s.vol;
@@ -542,7 +560,7 @@ function renderSettings(){
     let h='<optgroup label="Hazır sesler">'+Object.entries(SOUNDS).map(([k,v])=>opt(k,v.ad)).join('')+'</optgroup>';
     if(customs.length) h+='<optgroup label="Benim seslerim">'+customs.map(c=>opt('c:'+c.id,c.name)).join('')+'</optgroup>';
     $('#'+id).innerHTML=h; });
-  $('#bgNote').textContent = NB ? 'Uygulama arka plandayken süre bitince telefonun bildirim sesiyle haber verilir.' : 'Tarayıcı sürümünde sesler sayfa açıkken çalar.';
+  $('#bgNote').textContent = NB ? 'Seçtiğin sesler uygulama arka plandayken de çalar. Telefon sessizdeyse ses çalmaz, yalnızca bildirim gelir.' : 'Tarayıcı sürümünde sesler sayfa açıkken çalar.';
 }
 let view='timer';
 function renderAll(){ const now=Date.now(); renderTimer(now); if(view==='cal') renderCal(); }
@@ -598,7 +616,7 @@ function setNum(k,v,inp){ const mn=+inp.dataset.min, mx=+inp.dataset.max; v=Math
 $('#durCard').addEventListener('click',e=>{ const b=e.target.closest('button[data-d]'); if(!b) return; const inp=$('#durCard input[data-k="'+b.dataset.k+'"]'); setNum(b.dataset.k, st()[b.dataset.k]+ +b.dataset.d, inp); });
 $('#durCard').addEventListener('change',e=>{ const i=e.target; if(i.dataset.k) setNum(i.dataset.k, parseInt(i.value), i); });
 ['autoBreak','autoFocus','vibrate'].forEach(id=>$('#'+id).onchange=e=>{ st()[id]=e.target.checked; save(); });
-['sndFocus','sndBreak'].forEach(id=>$('#'+id).onchange=e=>{ st()[id]=e.target.value; save(); playSound(e.target.value); });
+['sndFocus','sndBreak'].forEach(id=>$('#'+id).onchange=e=>{ st()[id]=e.target.value; save(); playSound(e.target.value); exportAll(); });
 $('#addSnd').onclick=()=>$('#sndFile').click();
 $('#sndFile').onchange=async e=>{ const f=e.target.files&&e.target.files[0]; e.target.value=''; if(!f) return;
   if(f.size>5*1024*1024){ toast('Dosya 5 MB\'tan büyük'); return; }
@@ -611,7 +629,7 @@ $('#customList').addEventListener('click',e=>{ const p=e.target.closest('[data-c
   if(d){ const id=d.dataset.cd, c=customs.find(x=>x.id===id);
     confirmSheet('Ses silinsin mi?', esc(c?c.name:'')+' listeden kaldırılacak.','Sil', async()=>{ try{ await SDB.del(id); }catch(e){}
       if(curls[id]){ URL.revokeObjectURL(curls[id]); delete curls[id]; }
-      ['sndFocus','sndBreak'].forEach(k=>{ if(st()[k]==='c:'+id) st()[k]='zil'; }); save(); await loadCustoms(); renderSettings(); toast('Silindi'); }); } });
+      ['sndFocus','sndBreak'].forEach(k=>{ if(st()[k]==='c:'+id) st()[k]='zil'; }); save(); await loadCustoms(); renderSettings(); exportAll(); toast('Silindi'); }); } });
 $('#colorRow').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; st().color=b.dataset.c; save(); applyTheme(); renderSettings(); });
 $('#themeSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; st().theme=b.dataset.th; save(); applyTheme(); renderSettings(); });
 $('#vol').oninput=e=>{ st().vol=+e.target.value; save(); };
@@ -637,7 +655,7 @@ $('#wipeBtn').onclick=()=>confirmSheet('Tüm kayıtlar silinsin mi?','Takvimdeki
 let lastSave=0;
 function loop(){ const now=Date.now(); if(settle(now)) save(); if(now-lastSave>5000){ save(); lastSave=now; } if(!hidden) renderTimer(now); }
 applyTheme(); settle(Date.now()); renderAll(); save();
-loadCustoms().then(()=>{ if(view==='set') renderSettings(); });
+loadCustoms().then(()=>{ if(view==='set') renderSettings(); exportAll(); });
 setInterval(loop,250);
 window.addEventListener('pagehide',()=>{ settle(Date.now()); save(); });
 })();

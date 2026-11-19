@@ -12,6 +12,9 @@ import android.net.Uri;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Base64;
+import java.io.File;
+import java.io.FileOutputStream;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.View;
@@ -33,10 +36,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         NotificationManager nm = getSystemService(NotificationManager.class);
+        nm.deleteNotificationChannel("odak_timer"); // eski kanal (telefonun kendi sesiyle çalıyordu)
         NotificationChannel ch = new NotificationChannel(
                 AlarmReceiver.CHANNEL, "Zamanlayıcı", NotificationManager.IMPORTANCE_HIGH);
         ch.setDescription("Odak ve mola bitiş bildirimleri");
         ch.enableVibration(true);
+        ch.setSound(null, null); // sesi uygulama kendisi çalar (seçtiğin ses)
         nm.createNotificationChannel(ch);
 
         if (Build.VERSION.SDK_INT >= 33
@@ -97,10 +102,12 @@ public class MainActivity extends Activity {
         moveTaskToBack(true);
     }
 
-    private PendingIntent alarmIntent(int id, String title, String text) {
+    private PendingIntent alarmIntent(int id, String title, String text, String role, double vol) {
         Intent i = new Intent(this, AlarmReceiver.class);
         if (title != null) i.putExtra("title", title);
         if (text != null) i.putExtra("text", text);
+        if (role != null) i.putExtra("role", role);
+        i.putExtra("vol", (float) vol);
         return PendingIntent.getBroadcast(this, id, i,
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
@@ -108,11 +115,11 @@ public class MainActivity extends Activity {
     /** JavaScript'ten çağrılan köprü: window.Android.* */
     public class Bridge {
         @JavascriptInterface
-        public void schedule(int id, double atMillis, String title, String text) {
+        public void schedule(int id, double atMillis, String title, String text, String role, double vol) {
             AlarmManager am = getSystemService(AlarmManager.class);
             if (am == null) return;
             long at = (long) atMillis;
-            PendingIntent pi = alarmIntent(id, title, text);
+            PendingIntent pi = alarmIntent(id, title, text, role, vol);
             try {
                 boolean exact = Build.VERSION.SDK_INT < 31 || am.canScheduleExactAlarms();
                 if (exact) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
@@ -125,7 +132,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void cancel(int id) {
             AlarmManager am = getSystemService(AlarmManager.class);
-            if (am != null) am.cancel(alarmIntent(id, null, null));
+            if (am != null) am.cancel(alarmIntent(id, null, null, null, 0));
         }
 
         /** Uygulama içindeki tema seçimine göre durum/gezinme çubuğu renklerini ayarlar. */
@@ -144,6 +151,17 @@ public class MainActivity extends Activity {
                 int f = d.getSystemUiVisibility();
                 d.setSystemUiVisibility(dark ? (f & ~lightFlags) : (f | lightFlags));
             });
+        }
+
+        /** Seçilen sesi (focus/break) arka planda çalınabilsin diye dosyaya kaydeder. Boş = sessiz. */
+        @JavascriptInterface
+        public void saveSound(String role, String base64) {
+            if (!"focus".equals(role) && !"break".equals(role)) return;
+            try {
+                byte[] data = (base64 == null || base64.isEmpty()) ? new byte[0] : Base64.decode(base64, Base64.DEFAULT);
+                File f = new File(getFilesDir(), "snd_" + role);
+                try (FileOutputStream out = new FileOutputStream(f)) { out.write(data); }
+            } catch (Exception ignored) { }
         }
 
         @JavascriptInterface
