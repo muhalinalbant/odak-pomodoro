@@ -7,7 +7,7 @@
 <script>try{var _t=(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).theme||'auto';
 if(_t==='dark'||_t==='black'||(_t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');
 if(_t==='black')document.documentElement.classList.add('black');
-var _c=({domates:['Domates','214,90,74','224,138,60','184,69,95'],okyanus:['Okyanus','61,124,201','47,159,179','90,95,196'],orman:['Orman','52,140,96','106,163,63','42,127,132'],lavanta:['Lavanta','138,99,201','176,101,184','95,106,200'],gul:['Gül','208,87,127','224,122,106','168,90,168'],amber:['Amber','196,132,36','201,162,39','184,97,58'],grafit:['Grafit','110,121,134','118,150,140','108,115,152']})[(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).color];
+var _c=({domates:['Domates','214,90,74','224,138,60','184,69,95'],okyanus:['Okyanus','61,124,201','47,159,179','90,95,196'],orman:['Orman','52,140,96','106,163,63','42,127,132'],lavanta:['Lavanta','138,99,201','176,101,184','95,106,200'],gul:['Gül','208,87,127','224,122,106','168,90,168'],amber:['Amber','196,132,36','201,162,39','184,97,58'],grafit:['Grafit','110,121,134','118,150,140','108,115,152'],turkuaz:['Turkuaz','18,150,150','80,170,120','40,110,170'],zeytin:['Zeytin','122,132,38','170,150,50','80,120,90'],kakao:['Kakao','139,94,66','190,130,80','110,90,110']})[(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).color];
 if(_c){var _s=document.documentElement.style;_s.setProperty('--ac',_c[1]);_s.setProperty('--sh',_c[2]);_s.setProperty('--lg',_c[3]);}}catch(e){}</script>
 <style>
 :root{
@@ -127,7 +127,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .topic .d small{display:block;font-size:11px;color:var(--muted);font-weight:500}
 .anGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 10px}
 .anGrid .lbl{font-size:12px;color:var(--muted)}
-.anGrid.empty .val{color:var(--muted)}
+.anGrid.empty .val,.anGrid .mutedV .val{color:var(--muted)}
+.anTop{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line)}
 .anGrid .val{font-weight:600;font-size:17px;font-variant-numeric:tabular-nums}
 .dil{display:flex;gap:10px;height:96px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
 .dil div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
@@ -348,9 +349,6 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
     <div class="wk"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
     <div class="grid" id="grid"></div>
     <div class="legend" id="legend"></div>
-    <div class="dayInfo" id="dayInfo"></div>
-    <div class="mTotal"><span id="mTotLbl">Ay toplamı</span><b id="mTot">0 dk</b></div>
-    <div class="mTotal" style="border:0;margin-top:4px;padding-top:0"><span>Günlük ortalama</span><b id="mAvg">–</b></div>
   </div>
   <p class="note">Bir güne dokununca o günün ayrıntılarını görebilirsin.</p>
   <h2>Oturumlara göre</h2>
@@ -377,7 +375,7 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
     <div class="row"><div class="t">Mola bitince</div>
       <select id="sndBreak"></select><button class="play" data-play="sndBreak"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg></button></div>
     <div id="customList"></div>
-    <div class="addRow"><button class="btn" id="addSnd">+ Ekle</button><input type="file" id="sndFile" accept="audio/*" hidden></div>
+    <div class="addRow"><button class="btn" id="addSnd">+ Kendi sesini ekle</button><input type="file" id="sndFile" accept="audio/*" hidden></div>
     <div class="row"><div class="t">Ses düzeyi</div><input type="range" id="vol" min="0" max="1" step="0.05"></div>
     <div class="row"><div class="t">Titreşim</div><label class="sw"><input type="checkbox" id="vibrate"><i></i></label></div>
   </div>
@@ -711,11 +709,12 @@ function topicsHtml(agg,emptyMsg){
   const rows=Object.entries(agg).filter(r=>r[1]>=60).sort((a,b)=>b[1]-a[1]); const tot=rows.reduce((a,r)=>a+r[1],0)||1;
   if(!rows.length) return '<div class="topic" style="opacity:.55"><div class="n">Kayıt yok</div><div class="tb"><i style="width:0"></i></div><div class="d">0 dk</div></div>'+(emptyMsg?'<div class="note" style="margin:6px 0 0">'+emptyMsg+'</div>':'');
   return rows.map(([n,v])=>'<div class="topic"><div class="n">'+(n?esc(n):'<span style="color:var(--muted)">Adsız</span>')+'</div><div class="tb"><i style="width:'+(v/rows[0][1]*100)+'%"></i></div><div class="d">'+fmtDur(v)+'<small>%'+Math.round(v/tot*100)+'</small></div></div>').join(''); }
-function analysisHtml(fromTs,toTs){
+function analysisHtml(fromTs,toTs,top){
   const ss=sessionsIn(fromTs,toTs).filter(x=>x.m!=='man'), n=ss.length;
   const sum=ss.reduce((a,x)=>a+x.sec,0), longest=n?ss.reduce((a,x)=>x.sec>a.sec?x:a):null;
   const dil=[0,0,0,0]; ss.forEach(x=>dil[dilimOf(x.s)]+=x.sec); const mxD=Math.max(...dil)||1, bestD=n?dil.indexOf(Math.max(...dil)):-1;
-  return '<div class="anGrid'+(n?'':' empty')+'">'+
+  return (top?'<div class="anGrid anTop">'+top.map(([l,v,e])=>'<div'+(e?' class="mutedV"':'')+'><div class="lbl">'+l+'</div><div class="val">'+v+'</div></div>').join('')+'</div>':'')+
+    '<div class="anGrid'+(n?'':' empty')+'">'+
     '<div><div class="lbl">Oturum</div><div class="val">'+n+'</div></div>'+
     '<div><div class="lbl">Ortalama oturum</div><div class="val">'+(n?fmtDur(sum/n):'–')+'</div></div>'+
     '<div><div class="lbl">En uzun oturum</div><div class="val">'+(n?fmtDur(longest.sec):'–')+'</div></div>'+
@@ -735,15 +734,15 @@ function renderMonth(){
     h+='<button class="day'+(lv?' l'+lv:'')+(k===tk?' td':'')+(fut?' fut':'')+'" data-k="'+k+'" aria-label="'+d+' '+AYLAR[viewM]+': '+(s?fmtDur(s):'çalışma yok')+'">'+d+'<div class="dur">'+fmtCell(s)+'</div></button>';
   }
   $('#grid').innerHTML=h;
-  $('#mTotLbl').textContent=AYLAR[viewM]+' toplamı'; $('#mTot').textContent=fmtDur(mt);
-  $('#mAvg').textContent = cnt? fmtDur(mt/cnt)+' ('+cnt+' gün)' : '–';
   $('#legend').innerHTML='<b>Renk:</b><i></i>yok <i class="day l1"></i>&lt;1 sa <i class="day l2"></i>1–2 <i class="day l3"></i>2–4 <i class="day l4"></i>4+ sa';
   let best=null; for(let d=1; d<=days; d++){ const k=viewY+'-'+pad(viewM+1)+'-'+pad(d), v=S.log[k]||0; if(v>0&&(!best||v>best[1])) best=[d,v]; }
-  $('#dayInfo').innerHTML = best ? '<div><div class="lbl">Ayın en uzun çalışma günü</div><div class="val">'+best[0]+' '+AYLAR[viewM]+'</div></div><div class="val">'+fmtDur(best[1])+'</div>'
+  if(0) $('#dayInfo').innerHTML = best ? '<div><div class="lbl">Ayın en uzun çalışma günü</div><div class="val">'+best[0]+' '+AYLAR[viewM]+'</div></div><div class="val">'+fmtDur(best[1])+'</div>'
                                  : '<div class="lbl">Bu ay henüz kayıt yok</div>';
   const magg={}; for(let d=1; d<=days; d++){ const t=dayTopics(viewY+'-'+pad(viewM+1)+'-'+pad(d)); for(const n in t) magg[n]=(magg[n]||0)+t[n]; }
   $('#mTopics').innerHTML=topicsHtml(magg,'Bu ay adlandırılmış oturum yok.');
-  $('#mAn').innerHTML=analysisHtml(first.getTime(), new Date(viewY,viewM+1,1).getTime());
+  $('#mAn').innerHTML=analysisHtml(first.getTime(), new Date(viewY,viewM+1,1).getTime(),
+    [[AYLAR[viewM]+' toplamı', mt>=60?fmtDur(mt):'0 dk', mt<60], ['Günlük ortalama', cnt?fmtDur(mt/cnt):'–', !cnt],
+     ['Çalışılan gün', cnt+' gün', !cnt], ['Ayın en uzun günü', best?best[0]+' '+AYLAR[viewM]:'–', !best]]);
 }
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function renderCustoms(){
@@ -752,7 +751,7 @@ function renderCustoms(){
     '<button class="del" data-cd="'+c.id+'" aria-label="Sil">×</button></div>').join('') : '';
 }
 const MQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
-const COLORS={domates:['Domates','214,90,74','224,138,60','184,69,95'],okyanus:['Okyanus','61,124,201','47,159,179','90,95,196'],orman:['Orman','52,140,96','106,163,63','42,127,132'],lavanta:['Lavanta','138,99,201','176,101,184','95,106,200'],gul:['Gül','208,87,127','224,122,106','168,90,168'],amber:['Amber','196,132,36','201,162,39','184,97,58'],grafit:['Grafit','110,121,134','118,150,140','108,115,152']};
+const COLORS={domates:['Domates','214,90,74','224,138,60','184,69,95'],okyanus:['Okyanus','61,124,201','47,159,179','90,95,196'],orman:['Orman','52,140,96','106,163,63','42,127,132'],lavanta:['Lavanta','138,99,201','176,101,184','95,106,200'],gul:['Gül','208,87,127','224,122,106','168,90,168'],amber:['Amber','196,132,36','201,162,39','184,97,58'],grafit:['Grafit','110,121,134','118,150,140','108,115,152'],turkuaz:['Turkuaz','18,150,150','80,170,120','40,110,170'],zeytin:['Zeytin','122,132,38','170,150,50','80,120,90'],kakao:['Kakao','139,94,66','190,130,80','110,90,110']};
 function applyTheme(){
   const P=COLORS[st().color]||COLORS.domates, R=document.documentElement.style;
   R.setProperty('--ac',P[1]); R.setProperty('--sh',P[2]); R.setProperty('--lg',P[3]);
@@ -916,6 +915,13 @@ $('#swEveryIn').onchange=e=>setSwEvery(parseInt(e.target.value));
 })();
 $('#editToday').onclick=()=>editDay(dkey(new Date()));
 $('#calSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; calView=b.dataset.cv; renderCal(); window.scrollTo(0,0); });
+(()=>{ const V=['day','week','month'], el=$('#v-cal'); let x0=null,y0=0;
+  el.addEventListener('touchstart',e=>{ if($('#sheet').classList.contains('on')) return; const t=e.touches[0]; x0=t.clientX; y0=t.clientY; },{passive:true});
+  el.addEventListener('touchend',e=>{ if(x0==null) return; const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
+    if(Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)*0.6) return;
+    const i=V.indexOf(calView)+(dx<0?1:-1); if(i<0||i>2) return; calView=V[i]; renderCal();
+    const box=$('#'+calView+'View'); box.classList.remove('swipeL','swipeR'); void box.offsetWidth; box.classList.add(dx<0?'swipeL':'swipeR'); window.scrollTo(0,0); });
+})();
 $('#prevD').onclick=()=>{ dayOff--; renderDay(); };
 $('#nextD').onclick=()=>{ if(dayOff<0){ dayOff++; renderDay(); } };
 $('#dSes').addEventListener('click',e=>onSesClick(e,renderDay));
