@@ -74,7 +74,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .mini .val{font-weight:600;font-variant-numeric:tabular-nums}
 
 /* stats */
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats .card{padding:12px 10px!important}
+.stats .val{font-size:16px!important;white-space:nowrap}
 .stats .card{padding:12px 14px}
 .stats .lbl{color:var(--muted);font-size:12px}
 .stats .val{font-size:20px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
@@ -85,7 +87,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .calHead button{width:36px;height:36px;border-radius:50%;font-size:20px;color:var(--muted)}
 .wk,.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
 .wk span{font-size:11px;color:var(--muted);padding-bottom:4px}
-.grid{gap:5px 3px}
+.grid{gap:5px 2px}
 .day{min-height:56px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8px;font-size:13.5px;color:var(--text);position:relative}
 .day .dur{margin-top:5px;font-size:9.5px;font-weight:700;color:var(--text);white-space:nowrap;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
 .day.l1{background:rgba(var(--ac),.13)}.day.l2{background:rgba(var(--ac),.26)}.day.l3{background:rgba(var(--ac),.40)}.day.l4{background:rgba(var(--ac),.55)}
@@ -220,16 +222,15 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
 </div></section>
 
 <!-- ============ TAKVİM ============ -->
-<section class="view" id="v-cal"><div class="wrap">
+<section class="view" id="v-cal"><div class="wrap" style="padding-left:10px;padding-right:10px">
   <div class="stats">
     <div class="card"><div class="lbl">Bugün</div><div class="val" id="sToday">0 dk</div></div>
     <div class="card"><div class="lbl">Bu hafta</div><div class="val" id="sWeek">0 dk</div></div>
     <div class="card"><div class="lbl">Bu ay</div><div class="val" id="sMonth">0 dk</div></div>
-    <div class="card"><div class="lbl">Toplam</div><div class="val" id="sAll">0 dk</div></div>
   </div>
 
   <h2>Takvim</h2>
-  <div class="card" style="padding:14px 10px">
+  <div class="card" style="padding:14px 6px">
     <div class="calHead"><button id="prevM" aria-label="Önceki ay">‹</button><b id="mLabel"></b><button id="nextM" aria-label="Sonraki ay">›</button></div>
     <div class="wk"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
     <div class="grid" id="grid"></div>
@@ -505,7 +506,7 @@ function renderTotals(now){
 let viewY,viewM; { const d=new Date(); viewY=d.getFullYear(); viewM=d.getMonth(); }
 function renderCal(){
   const now=new Date(), x=totals(now.getTime());
-  $('#sToday').textContent=fmtDur(x.today); $('#sWeek').textContent=fmtDur(x.week); $('#sMonth').textContent=fmtDur(x.month); $('#sAll').textContent=fmtDur(x.all);
+  $('#sToday').textContent=fmtDur(x.today); $('#sWeek').textContent=fmtDur(x.week); $('#sMonth').textContent=fmtDur(x.month);
   $('#mLabel').textContent=AYLAR[viewM]+' '+viewY;
   const first=new Date(viewY,viewM,1), days=new Date(viewY,viewM+1,0).getDate(), lead=(first.getDay()+6)%7, tk=dkey(now);
   let h='', mt=0, cnt=0;
