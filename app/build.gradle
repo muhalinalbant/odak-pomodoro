@@ -10,15 +10,25 @@ android {
         applicationId "com.odak.pomodoro"
         minSdk 26
         targetSdk 34
-        versionCode 7
-        versionName "1.6"
+        versionCode 8
+        versionName "1.7"
+    }
+
+    // Sabit imza: yeni sürümler eski uygulamanın üzerine kurulabilsin.
+    // Anahtar dosyası şifrelidir; şifre GitHub'daki KEYSTORE_PASSWORD gizli değişkeninden gelir.
+    signingConfigs {
+        odak {
+            storeFile file('odak.jks')
+            storePassword System.getenv('KEYSTORE_PASSWORD')
+            keyAlias 'odak'
+            keyPassword System.getenv('KEYSTORE_PASSWORD')
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            // Kolay kurulum için hata ayıklama anahtarıyla imzalanır.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.odak
         }
     }
 

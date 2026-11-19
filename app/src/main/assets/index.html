@@ -74,6 +74,36 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .mini .val{font-weight:600;font-variant-numeric:tabular-nums}
 
 /* stats */
+.calSeg{position:sticky;top:0;z-index:4;background:var(--bg);padding:10px 0 12px;margin-top:-4px}
+.wkHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.wkHead button{width:36px;height:36px;border-radius:50%;font-size:20px;color:var(--muted)}
+.wkHead button:disabled{opacity:.25}
+.wkHead b{font-size:15px;font-weight:600}
+.wkBig{text-align:center;margin:6px 0 2px}
+.wkBig .v{font-size:34px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.wkBig .s{color:var(--muted);font-size:13px;margin-top:2px}
+.wkBars .bars{height:170px;margin-top:14px}
+.wkBars .bar{cursor:pointer}
+.wkStats{display:flex;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.wkStats div{flex:1;text-align:center}
+.wkStats div+div{border-left:1px solid var(--line)}
+.wkStats .lbl{font-size:12px;color:var(--muted)}
+.wkStats .val{font-weight:600;font-variant-numeric:tabular-nums;margin-top:2px}
+.topic{display:flex;align-items:center;gap:10px;padding:9px 0}
+.topic+.topic{border-top:1px solid var(--line)}
+.topic .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topic .tb{flex:1.2;height:6px;border-radius:3px;background:var(--chip);overflow:hidden}
+.topic .tb i{display:block;height:100%;background:var(--focus);border-radius:3px}
+.topic .d{font-weight:600;font-variant-numeric:tabular-nums;font-size:14px;min-width:70px;text-align:right}
+.label{display:flex;justify-content:center;margin:-4px 0 16px}
+.label button{display:flex;align-items:center;gap:6px;max-width:80%;padding:7px 14px;border-radius:99px;background:var(--chip);color:var(--muted);font-size:14px}
+.label button.has{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.label button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lblIn{width:100%;font-size:17px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);margin-bottom:12px}
+.recent{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.recent button{padding:7px 12px;border-radius:99px;background:var(--chip);font-size:13.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.dayTopics{margin:-4px 0 14px;font-size:13.5px}
 .weekTot{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:10px;margin-bottom:6px;border-bottom:1px solid var(--line);color:var(--muted);font-size:14px}
 .weekTot b{color:var(--text);font-size:20px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -207,6 +237,8 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
     <div class="swSub" id="swSub">Serbest çalışma · süre bugüne eklenir</div>
   </div>
 
+  <div class="label"><button id="labelBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span id="labelTxt">Oturum adı ekle</span></button></div>
+
   <div class="controls">
     <button class="icon" id="resetBtn" aria-label="Sıfırla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
     <button class="primary" id="startBtn">Başlat</button>
@@ -225,10 +257,25 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
 
 <!-- ============ TAKVİM ============ -->
 <section class="view" id="v-cal"><div class="wrap" style="padding-left:10px;padding-right:10px">
-  <h2 style="margin-top:6px">Bu hafta</h2>
-  <div class="card"><div class="weekTot"><span>Haftalık toplam</span><b id="sWeek">0 dk</b></div><div class="bars" id="bars"></div></div>
+  <div class="calSeg"><div class="seg" id="calSeg"><button data-cv="week" class="on">Haftalık</button><button data-cv="month">Aylık</button></div></div>
 
-  <h2>Takvim</h2>
+  <div id="weekView">
+    <div class="card wkBars">
+      <div class="wkHead"><button id="prevW" aria-label="Önceki hafta">‹</button><b id="wLabel"></b><button id="nextW" aria-label="Sonraki hafta">›</button></div>
+      <div class="wkBig"><div class="v" id="wTot">0 dk</div><div class="s" id="wCmp"></div></div>
+      <div class="bars" id="bars"></div>
+      <div class="wkStats">
+        <div><div class="lbl">Çalışılan gün</div><div class="val" id="wDays">0</div></div>
+        <div><div class="lbl">Günlük ortalama</div><div class="val" id="wAvg">–</div></div>
+        <div><div class="lbl">En uzun gün</div><div class="val" id="wBest">–</div></div>
+      </div>
+    </div>
+    <h2>Oturumlara göre</h2>
+    <div class="card" id="wTopics"></div>
+    <p class="note">Bir güne dokununca o günün süresini değiştirebilirsin.</p>
+  </div>
+
+  <div id="monthView" hidden>
   <div class="card" style="padding:14px 6px">
     <div class="calHead"><button id="prevM" aria-label="Önceki ay">‹</button><b id="mLabel"></b><button id="nextM" aria-label="Sonraki ay">›</button></div>
     <div class="wk"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
@@ -239,6 +286,7 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
     <div class="mTotal" style="border:0;margin-top:4px;padding-top:0"><span>Günlük ortalama</span><b id="mAvg">–</b></div>
   </div>
   <p class="note">Bir güne dokununca o günün toplam süresini görebilir ve değiştirebilirsin.</p>
+  </div>
 </div></section>
 
 <!-- ============ AYARLAR ============ -->
@@ -315,6 +363,7 @@ let S=load()||{};
 function normalize(){
   S.settings=Object.assign({},DEF,S.settings||{});
   S.log=S.log||{};
+  S.tags=S.tags||{};
   S.t=Object.assign({mode:'pomo',phase:'focus',running:false,endAt:0,remaining:null,count:0,last:0,swRun:false,swAcc:0,swStart:0},S.t||{});
 }
 normalize();
@@ -332,7 +381,14 @@ function fmtShort(sec){ const mm=Math.round(sec/60); if(mm<=0) return ''; const 
 function fmtClock(ms){ const s=Math.max(0,Math.ceil(ms/1000)); const m=Math.floor(s/60); return pad(m)+':'+pad(s%60); }
 function fmtSw(ms){ const s=Math.floor(ms/1000); return Math.floor(s/3600)+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60); }
 const durMs=p=>st()[p]*60000;
-function addLog(key,sec){ if(sec>0) S.log[key]=(S.log[key]||0)+sec; }
+function addLog(key,sec){ if(!(sec>0)) return; S.log[key]=(S.log[key]||0)+sec;
+  const L=(T().label||'').trim(); if(L){ const d=S.tags[key]||(S.tags[key]={}); d[L]=(d[L]||0)+sec; } }
+function dayTopics(key){ // {ad: sn} + adsız kalan kısım
+  const tot=S.log[key]||0, t=Object.assign({},S.tags[key]||{}); let sum=0; for(const v of Object.values(t)) sum+=v;
+  if(sum>tot){ const f=tot/sum; for(const k in t) t[k]*=f; sum=tot; }
+  if(tot-sum>=60) t['']=tot-sum; return t; }
+function recentLabels(){ const seen={}; Object.keys(S.tags).sort().reverse().slice(0,60).forEach(k=>{ for(const n in S.tags[k]) if(!(n in seen)) seen[n]=k; });
+  return Object.keys(seen).slice(0,10); }
 function credit(a,b){ // a..b aralığını gün sınırlarından bölerek günlere ekle
   while(a<b){ const d=new Date(a); const next=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1).getTime();
     const e=Math.min(b,next); addLog(dkey(a),(e-a)/1000); a=e; }
@@ -500,9 +556,39 @@ function renderTotals(now){
   $('#todayVal').textContent=fmtDur(x.today); $('#weekVal').textContent=fmtDur(x.week); $('#monthVal').textContent=fmtDur(x.month);
 }
 let viewY,viewM; { const d=new Date(); viewY=d.getFullYear(); viewM=d.getMonth(); }
+let calView='week', weekOff=0;
 function renderCal(){
-  const now=new Date(), x=totals(now.getTime());
-  $('#sWeek').textContent=fmtDur(x.week);
+  $$('#calSeg button').forEach(b=>b.classList.toggle('on',b.dataset.cv===calView));
+  $('#weekView').hidden = calView!=='week'; $('#monthView').hidden = calView!=='month';
+  if(calView==='week') renderWeek(); else renderMonth();
+}
+function renderWeek(){
+  const now=new Date(), tk=dkey(now), ws=weekStart(now); ws.setDate(ws.getDate()+weekOff*7);
+  const we=new Date(ws); we.setDate(ws.getDate()+6);
+  $('#wLabel').textContent = weekOff===0 ? 'Bu hafta' : weekOff===-1 ? 'Geçen hafta' :
+    ws.getDate()+(ws.getMonth()!==we.getMonth()?' '+AYLAR[ws.getMonth()]:'')+' – '+we.getDate()+' '+AYLAR[we.getMonth()];
+  $('#nextW').disabled = weekOff>=0;
+  const vals=[]; for(let i=0;i<7;i++){ const d=new Date(ws); d.setDate(ws.getDate()+i); vals.push([d,S.log[dkey(d)]||0]); }
+  const tot=vals.reduce((a,v)=>a+v[1],0), worked=vals.filter(v=>v[1]>=60);
+  const pws=new Date(ws); pws.setDate(ws.getDate()-7); const pwe=new Date(ws); pwe.setDate(ws.getDate()-1); const prev=sumRange(pws,pwe);
+  $('#wTot').textContent=fmtDur(tot);
+  const diff=Math.round((tot-prev)/60);
+  $('#wCmp').textContent = prev<60 && tot<60 ? (weekOff===0?'Bu hafta henüz kayıt yok':'Bu hafta kayıt yok') :
+    prev<60 ? 'Önceki haftada kayıt yok' : diff===0 ? 'Önceki haftayla aynı' : 'Önceki haftadan '+fmtDur(Math.abs(diff)*60)+(diff>0?' fazla':' az');
+  $('#wDays').textContent=worked.length+' / 7';
+  $('#wAvg').textContent= worked.length? fmtDur(tot/worked.length) : '–';
+  const best=vals.reduce((a,v)=>v[1]>a[1]?v:a,[null,0]);
+  $('#wBest').textContent= best[0]&&best[1]>=60 ? GUNLER[best[0].getDay()] : '–';
+  const mx=Math.max(3600,...vals.map(v=>v[1])); const lb=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+  $('#bars').innerHTML=vals.map(([d,s],i)=>'<div class="bar'+(dkey(d)===tk?' td':'')+'" data-k="'+dkey(d)+'"><em>'+fmtCell(s)+'</em><i style="height:'+(s/mx*82)+'%"></i><span>'+lb[i]+'</span></div>').join('');
+  // oturumlara göre
+  const agg={}; vals.forEach(([d])=>{ const t=dayTopics(dkey(d)); for(const n in t) agg[n]=(agg[n]||0)+t[n]; });
+  const rows=Object.entries(agg).filter(r=>r[1]>=60).sort((a,b)=>b[1]-a[1]); const mxT=rows.length?rows[0][1]:1;
+  $('#wTopics').innerHTML = rows.length ? rows.map(([n,v])=>'<div class="topic"><div class="n">'+(n?esc(n):'<span style="color:var(--muted)">Adsız</span>')+'</div><div class="tb"><i style="width:'+(v/mxT*100)+'%"></i></div><div class="d">'+fmtDur(v)+'</div></div>').join('')
+    : '<div class="note" style="margin:2px 0">Zamanlayıcı ekranında oturuma ad verirsen, haftalık süreler burada konulara göre ayrılır.</div>';
+}
+function renderMonth(){
+  const now=new Date();
   $('#mLabel').textContent=AYLAR[viewM]+' '+viewY;
   const first=new Date(viewY,viewM,1), days=new Date(viewY,viewM+1,0).getDate(), lead=(first.getDay()+6)%7, tk=dkey(now);
   let h='', mt=0, cnt=0;
@@ -520,10 +606,6 @@ function renderCal(){
   let best=null; for(let d=1; d<=days; d++){ const k=viewY+'-'+pad(viewM+1)+'-'+pad(d), v=S.log[k]||0; if(v>0&&(!best||v>best[1])) best=[d,v]; }
   $('#dayInfo').innerHTML = best ? '<div><div class="lbl">Ayın en uzun çalışma günü</div><div class="val">'+best[0]+' '+AYLAR[viewM]+'</div></div><div class="val">'+fmtDur(best[1])+'</div>'
                                  : '<div class="lbl">Bu ay henüz kayıt yok</div>';
-  // bu hafta çubukları
-  const ws=weekStart(now); const vals=[]; for(let i=0;i<7;i++){ const d=new Date(ws); d.setDate(ws.getDate()+i); vals.push([d,S.log[dkey(d)]||0]); }
-  const mx=Math.max(3600,...vals.map(v=>v[1])); const lb=['Pt','Sa','Ça','Pe','Cu','Ct','Pz'];
-  $('#bars').innerHTML=vals.map(([d,s],i)=>'<div class="bar'+(dkey(d)===tk?' td':'')+'"><em>'+fmtCell(s)+'</em><i style="height:'+(s/mx*82)+'%"></i><span>'+lb[i]+'</span></div>').join('');
 }
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function renderCustoms(){
@@ -574,7 +656,9 @@ function confirmSheet(title,text,okLbl,fn){
 function editDay(k){
   settle(Date.now());
   const [y,m,d]=k.split('-').map(Number), dt=new Date(y,m-1,d), cur=Math.round((S.log[k]||0)/60);
-  openSheet('<h3>'+d+' '+AYLAR[m-1]+' '+y+', '+GUNLER[dt.getDay()]+'</h3><p>Bu gün için toplam odak süresi</p>'+
+  const tp=Object.entries(dayTopics(k)).filter(r=>r[1]>=60).sort((a,b)=>b[1]-a[1]);
+  const tpH = tp.length && !(tp.length===1&&tp[0][0]==='') ? '<div class="dayTopics">'+tp.map(([n,v])=>'<div class="topic"><div class="n">'+(n?esc(n):'<span style="color:var(--muted)">Adsız</span>')+'</div><div class="d">'+fmtDur(v)+'</div></div>').join('')+'</div>' : '';
+  openSheet('<h3>'+d+' '+AYLAR[m-1]+' '+y+', '+GUNLER[dt.getDay()]+'</h3><p>Bu gün için toplam odak süresi</p>'+tpH+
     '<div class="hm"><label><input id="eh" inputmode="numeric" value="'+Math.floor(cur/60)+'">saat</label><b>:</b><label><input id="em" inputmode="numeric" value="'+(cur%60)+'">dakika</label></div>'+
     '<div class="quick"><button data-q="-15">−15 dk</button><button data-q="15">+15 dk</button><button data-q="25">+25 dk</button><button data-q="60">+1 sa</button></div>'+
     '<div class="acts"><button data-del>Sıfırla</button><button class="ok" data-ok>Kaydet</button></div>', b=>{
@@ -605,6 +689,24 @@ $('#resetBtn').onclick=()=>{ const t=T(), now=Date.now(); settle(now);
 $('#skipBtn').onclick=()=>{ const t=T(), now=Date.now(); settle(now);
   advance(now,false); save(); renderAll(); };
 $('#editToday').onclick=()=>editDay(dkey(new Date()));
+$('#calSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; calView=b.dataset.cv; renderCal(); window.scrollTo(0,0); });
+$('#prevW').onclick=()=>{ weekOff--; renderWeek(); };
+$('#nextW').onclick=()=>{ if(weekOff<0){ weekOff++; renderWeek(); } };
+$('#bars').addEventListener('click',e=>{ const b=e.target.closest('.bar'); if(b) editDay(b.dataset.k); });
+function renderLabel(){ const L=(T().label||'').trim(); $('#labelTxt').textContent=L||'Oturum adı ekle'; $('#labelBtn').classList.toggle('has',!!L); }
+$('#labelBtn').onclick=()=>{ const cur=(T().label||'').trim(), rec=recentLabels();
+  openSheet('<h3>Oturum adı</h3><p>Ne üzerine çalışıyorsun? Süreler bu adla kaydedilir.</p>'+
+    '<input class="lblIn" id="lblIn" maxlength="40" placeholder="Örn. Sağlık psikolojisi" value="'+esc(cur)+'">'+
+    (rec.length?'<div class="recent">'+rec.map(n=>'<button data-n="'+esc(n)+'" class="'+(n===cur?'on':'')+'">'+esc(n)+'</button>').join('')+'</div>':'')+
+    '<div class="acts"><button data-clr>Adsız</button><button class="ok" data-ok>Tamam</button></div>', b=>{
+    const inp=b.querySelector('#lblIn');
+    const apply=v=>{ settle(Date.now()); T().label=(v||'').trim().slice(0,40); save(); closeSheet(); renderLabel(); };
+    b.querySelectorAll('[data-n]').forEach(x=>x.onclick=()=>apply(x.dataset.n));
+    b.querySelector('[data-clr]').onclick=()=>apply('');
+    b.querySelector('[data-ok]').onclick=()=>apply(inp.value);
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter') apply(inp.value); });
+    setTimeout(()=>inp.focus(),150);
+  }); };
 $('#grid').addEventListener('click',e=>{ const b=e.target.closest('.day'); if(b) editDay(b.dataset.k); });
 $('#prevM').onclick=()=>{ if(--viewM<0){viewM=11;viewY--;} renderCal(); };
 $('#nextM').onclick=()=>{ if(++viewM>11){viewM=0;viewY++;} renderCal(); };
@@ -633,7 +735,7 @@ $('#vol').oninput=e=>{ st().vol=+e.target.value; save(); };
 $('#vol').onchange=()=>playSound(st().sndFocus);
 $$('[data-play]').forEach(b=>b.onclick=()=>playSound(st()[b.dataset.play]));
 
-$('#backupBtn').onclick=()=>{ settle(Date.now()); const data=JSON.stringify({v:1,settings:S.settings,log:S.log});
+$('#backupBtn').onclick=()=>{ settle(Date.now()); const data=JSON.stringify({v:2,settings:S.settings,log:S.log,tags:S.tags});
   openSheet('<h3>Yedek</h3><p>Bu metni kopyalayıp güvenli bir yere (ör. notlar) kaydet.</p><textarea id="bk" readonly>'+data.replace(/</g,'&lt;')+'</textarea><div class="acts"><button data-x>Kapat</button><button class="ok" data-c>Kopyala</button></div>',b=>{
     const ta=b.querySelector('#bk'); b.querySelector('[data-x]').onclick=closeSheet;
     b.querySelector('[data-c]').onclick=()=>{ ta.select(); let ok=false; try{ ok=document.execCommand('copy'); }catch(e){}
@@ -643,15 +745,16 @@ $('#restoreBtn').onclick=()=>{ openSheet('<h3>Geri yükle</h3><p>Daha önce ald�
   b.querySelector('[data-x]').onclick=closeSheet;
   b.querySelector('[data-ok]').onclick=()=>{ try{ const d=JSON.parse(b.querySelector('#rs').value); if(!d.log||typeof d.log!=='object') throw 0;
       S.log={}; for(const [k,v] of Object.entries(d.log)) if(/^\d{4}-\d\d-\d\d$/.test(k)&&+v>0) S.log[k]=+v;
+      S.tags = d.tags&&typeof d.tags==='object' ? d.tags : {};
       if(d.settings) S.settings=Object.assign({},DEF,d.settings); save(); closeSheet(); renderSettings(); renderAll(); toast('Yedek yüklendi'); }
     catch(e){ toast('Yedek metni okunamadı'); } };
 }); };
-$('#wipeBtn').onclick=()=>confirmSheet('Tüm kayıtlar silinsin mi?','Takvimdeki bütün çalışma süreleri kalıcı olarak silinir. Ayarların korunur.','Sil',()=>{ S.log={}; T().last=Date.now(); save(); renderAll(); toast('Kayıtlar silindi'); });
+$('#wipeBtn').onclick=()=>confirmSheet('Tüm kayıtlar silinsin mi?','Takvimdeki bütün çalışma süreleri kalıcı olarak silinir. Ayarların korunur.','Sil',()=>{ S.log={}; S.tags={}; T().last=Date.now(); save(); renderAll(); toast('Kayıtlar silindi'); });
 
 /* ---------- döngü ---------- */
 let lastSave=0;
 function loop(){ const now=Date.now(); if(settle(now)) save(); if(now-lastSave>5000){ save(); lastSave=now; } if(!hidden) renderTimer(now); }
-applyTheme(); settle(Date.now()); renderAll(); save();
+applyTheme(); settle(Date.now()); renderAll(); renderLabel(); save();
 loadCustoms().then(()=>{ if(view==='set') renderSettings(); exportAll(); });
 setInterval(loop,250);
 window.addEventListener('pagehide',()=>{ settle(Date.now()); save(); });
