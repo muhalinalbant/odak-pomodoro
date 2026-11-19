@@ -103,6 +103,25 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .recent{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
 .recent button{padding:7px 12px;border-radius:99px;background:var(--chip);font-size:13.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .recent button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.topic .d small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.anGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 10px}
+.anGrid .lbl{font-size:12px;color:var(--muted)}
+.anGrid .val{font-weight:600;font-size:17px;font-variant-numeric:tabular-nums}
+.dil{display:flex;gap:10px;height:96px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.dil div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.dil i{width:100%;max-width:44px;border-radius:6px 6px 3px 3px;background:var(--focus);opacity:.35}
+.dil .on i{opacity:1}
+.dil span{font-size:12px;margin-top:5px}.dil small{font-size:10.5px;color:var(--muted)}
+.dHead{display:flex;align-items:baseline;justify-content:space-between;margin:4px 0 12px}
+.dHead b{font-size:28px;font-variant-numeric:tabular-nums}
+.dHead span{color:var(--muted);font-size:13px;text-align:right}
+.sesList{max-height:34vh;overflow:auto;margin:0 0 14px}
+.ses{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px}
+.ses+.ses{border-top:1px solid var(--line)}
+.ses .tm{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;min-width:92px}
+.ses .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ses .d{font-weight:600;font-variant-numeric:tabular-nums}
+.sheetBox h4{margin:14px 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .dayTopics{margin:-4px 0 14px;font-size:13.5px}
 .weekTot{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:10px;margin-bottom:6px;border-bottom:1px solid var(--line);color:var(--muted);font-size:14px}
 .weekTot b{color:var(--text);font-size:20px}
@@ -272,7 +291,9 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
     </div>
     <h2>Oturumlara göre</h2>
     <div class="card" id="wTopics"></div>
-    <p class="note">Bir güne dokununca o günün süresini değiştirebilirsin.</p>
+    <h2>Analiz</h2>
+    <div class="card" id="wAn"></div>
+    <p class="note">Bir güne dokununca o günün ayrıntılarını görebilirsin.</p>
   </div>
 
   <div id="monthView" hidden>
@@ -285,7 +306,11 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
     <div class="mTotal"><span id="mTotLbl">Ay toplamı</span><b id="mTot">0 dk</b></div>
     <div class="mTotal" style="border:0;margin-top:4px;padding-top:0"><span>Günlük ortalama</span><b id="mAvg">–</b></div>
   </div>
-  <p class="note">Bir güne dokununca o günün toplam süresini görebilir ve değiştirebilirsin.</p>
+  <p class="note">Bir güne dokununca o günün ayrıntılarını görebilirsin.</p>
+  <h2>Oturumlara göre</h2>
+  <div class="card" id="mTopics"></div>
+  <h2>Analiz</h2>
+  <div class="card" id="mAn"></div>
   </div>
 </div></section>
 
@@ -363,7 +388,7 @@ let S=load()||{};
 function normalize(){
   S.settings=Object.assign({},DEF,S.settings||{});
   S.log=S.log||{};
-  S.tags=S.tags||{};
+  S.tags=S.tags||{}; S.ses=Array.isArray(S.ses)?S.ses:[];
   S.t=Object.assign({mode:'pomo',phase:'focus',running:false,endAt:0,remaining:null,count:0,last:0,swRun:false,swAcc:0,swStart:0},S.t||{});
 }
 normalize();
@@ -389,7 +414,17 @@ function dayTopics(key){ // {ad: sn} + adsız kalan kısım
   if(tot-sum>=60) t['']=tot-sum; return t; }
 function recentLabels(){ const seen={}; Object.keys(S.tags).sort().reverse().slice(0,60).forEach(k=>{ for(const n in S.tags[k]) if(!(n in seen)) seen[n]=k; });
   return Object.keys(seen).slice(0,10); }
+/* tek tek oturum kaydı: kesintisiz çalışma = 1 oturum */
+function runAdd(a,b){ const t=T(), L=(t.label||'').trim();
+  if(t.run && (Math.abs(a-t.run.e)>5000 || t.run.l!==L)) closeRun();
+  if(!t.run) t.run={s:a,e:a,l:L,sec:0,m:t.mode};
+  t.run.e=b; t.run.sec+=(b-a)/1000; }
+function closeRun(){ const t=T(), r=t.run; t.run=null; if(!r||r.sec<60) return;
+  S.ses.push({s:r.s,e:r.e,l:r.l,sec:Math.round(r.sec),m:r.m}); if(S.ses.length>5000) S.ses.splice(0,S.ses.length-5000); }
+function sessionsIn(fromTs,toTs){ const out=S.ses.filter(x=>x.s>=fromTs&&x.s<toTs); const r=T().run;
+  if(r&&r.sec>=60&&r.s>=fromTs&&r.s<toTs) out.push({s:r.s,e:r.e,l:r.l,sec:Math.round(r.sec),m:r.m,open:1}); return out.sort((a,b)=>a.s-b.s); }
 function credit(a,b){ // a..b aralığını gün sınırlarından bölerek günlere ekle
+  if(b>a) runAdd(a,b);
   while(a<b){ const d=new Date(a); const next=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1).getTime();
     const e=Math.min(b,next); addLog(dkey(a),(e-a)/1000); a=e; }
 }
@@ -489,7 +524,7 @@ function settle(now){ // geçen süreyi kaydet, biten fazları işle (arka pland
   if(t.mode==='pomo' && t.running){
     let guard=0;
     while(t.running && now>=t.endAt && guard++<500){
-      if(t.phase==='focus') credit(t.last,t.endAt);
+      if(t.phase==='focus'){ credit(t.last,t.endAt); closeRun(); }
       t.last=t.endAt; advance(t.endAt, now-t.endAt<3000 && !(hidden&&NB)); changed=true;
     }
     if(t.running){ if(t.phase==='focus') credit(t.last,now); t.last=now; }
@@ -498,9 +533,9 @@ function settle(now){ // geçen süreyi kaydet, biten fazları işle (arka pland
   return changed;
 }
 function startPomo(){ const t=T(), now=Date.now(); ac(); t.endAt=now+pomoLeft(now); t.last=now; t.running=true; t.remaining=null; }
-function pausePomo(){ const t=T(), now=Date.now(); settle(now); if(t.running){ t.remaining=t.endAt-now; t.running=false; } }
+function pausePomo(){ const t=T(), now=Date.now(); settle(now); closeRun(); if(t.running){ t.remaining=t.endAt-now; t.running=false; } }
 function startSw(){ const t=T(), now=Date.now(); ac(); t.swStart=now; t.last=now; t.swRun=true; }
-function pauseSw(){ const t=T(), now=Date.now(); settle(now); if(t.swRun){ t.swAcc+=now-t.swStart; t.swRun=false; } }
+function pauseSw(){ const t=T(), now=Date.now(); settle(now); closeRun(); if(t.swRun){ t.swAcc+=now-t.swStart; t.swRun=false; } }
 function swElapsed(now){ const t=T(); return t.swAcc+(t.swRun? now-t.swStart:0); }
 
 /* ---------- arka plan bildirimleri (APK) ---------- */
@@ -583,10 +618,26 @@ function renderWeek(){
   $('#bars').innerHTML=vals.map(([d,s],i)=>'<div class="bar'+(dkey(d)===tk?' td':'')+'" data-k="'+dkey(d)+'"><em>'+fmtCell(s)+'</em><i style="height:'+(s/mx*82)+'%"></i><span>'+lb[i]+'</span></div>').join('');
   // oturumlara göre
   const agg={}; vals.forEach(([d])=>{ const t=dayTopics(dkey(d)); for(const n in t) agg[n]=(agg[n]||0)+t[n]; });
-  const rows=Object.entries(agg).filter(r=>r[1]>=60).sort((a,b)=>b[1]-a[1]); const mxT=rows.length?rows[0][1]:1;
-  $('#wTopics').innerHTML = rows.length ? rows.map(([n,v])=>'<div class="topic"><div class="n">'+(n?esc(n):'<span style="color:var(--muted)">Adsız</span>')+'</div><div class="tb"><i style="width:'+(v/mxT*100)+'%"></i></div><div class="d">'+fmtDur(v)+'</div></div>').join('')
-    : '<div class="note" style="margin:2px 0">Zamanlayıcı ekranında oturuma ad verirsen, haftalık süreler burada konulara göre ayrılır.</div>';
+  $('#wTopics').innerHTML = topicsHtml(agg,'Zamanlayıcı ekranında oturuma ad verirsen, haftalık süreler burada konulara göre ayrılır.');
+  const wend=new Date(ws); wend.setDate(ws.getDate()+7); $('#wAn').innerHTML=analysisHtml(ws.getTime(),wend.getTime());
 }
+const DILIM=[['Sabah','05–12'],['Öğle','12–17'],['Akşam','17–22'],['Gece','22–05']];
+const dilimOf=ts=>{ const h=new Date(ts).getHours(); return h>=5&&h<12?0:h>=12&&h<17?1:h>=17&&h<22?2:3; };
+function topicsHtml(agg,emptyMsg){
+  const rows=Object.entries(agg).filter(r=>r[1]>=60).sort((a,b)=>b[1]-a[1]); const tot=rows.reduce((a,r)=>a+r[1],0)||1;
+  if(!rows.length) return '<div class="note" style="margin:2px 0">'+emptyMsg+'</div>';
+  return rows.map(([n,v])=>'<div class="topic"><div class="n">'+(n?esc(n):'<span style="color:var(--muted)">Adsız</span>')+'</div><div class="tb"><i style="width:'+(v/rows[0][1]*100)+'%"></i></div><div class="d">'+fmtDur(v)+'<small>%'+Math.round(v/tot*100)+'</small></div></div>').join(''); }
+function analysisHtml(fromTs,toTs){
+  const ss=sessionsIn(fromTs,toTs);
+  if(!ss.length) return '<div class="note" style="margin:2px 0">Zamanlayıcıyı kullandıkça oturum sayısı, ortalama oturum süresi ve en verimli saatlerin burada görünür.</div>';
+  const n=ss.length, sum=ss.reduce((a,x)=>a+x.sec,0), longest=ss.reduce((a,x)=>x.sec>a.sec?x:a);
+  const dil=[0,0,0,0]; ss.forEach(x=>dil[dilimOf(x.s)]+=x.sec); const mxD=Math.max(...dil)||1, bestD=dil.indexOf(Math.max(...dil));
+  return '<div class="anGrid">'+
+    '<div><div class="lbl">Oturum</div><div class="val">'+n+'</div></div>'+
+    '<div><div class="lbl">Ortalama oturum</div><div class="val">'+fmtDur(sum/n)+'</div></div>'+
+    '<div><div class="lbl">En uzun oturum</div><div class="val">'+fmtDur(longest.sec)+'</div></div>'+
+    '<div><div class="lbl">En verimli zaman</div><div class="val">'+DILIM[bestD][0]+'</div></div></div>'+
+    '<div class="dil">'+DILIM.map(([a,h],i)=>'<div class="'+(i===bestD?'on':'')+'"><i style="height:'+Math.max(3,dil[i]/mxD*100)+'%"></i><span>'+a+'</span><small>'+h+'</small></div>').join('')+'</div>'; }
 function renderMonth(){
   const now=new Date();
   $('#mLabel').textContent=AYLAR[viewM]+' '+viewY;
@@ -606,6 +657,9 @@ function renderMonth(){
   let best=null; for(let d=1; d<=days; d++){ const k=viewY+'-'+pad(viewM+1)+'-'+pad(d), v=S.log[k]||0; if(v>0&&(!best||v>best[1])) best=[d,v]; }
   $('#dayInfo').innerHTML = best ? '<div><div class="lbl">Ayın en uzun çalışma günü</div><div class="val">'+best[0]+' '+AYLAR[viewM]+'</div></div><div class="val">'+fmtDur(best[1])+'</div>'
                                  : '<div class="lbl">Bu ay henüz kayıt yok</div>';
+  const magg={}; for(let d=1; d<=days; d++){ const t=dayTopics(viewY+'-'+pad(viewM+1)+'-'+pad(d)); for(const n in t) magg[n]=(magg[n]||0)+t[n]; }
+  $('#mTopics').innerHTML=topicsHtml(magg,'Bu ay adlandırılmış oturum yok.');
+  $('#mAn').innerHTML=analysisHtml(first.getTime(), new Date(viewY,viewM+1,1).getTime());
 }
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function renderCustoms(){
@@ -653,6 +707,27 @@ function confirmSheet(title,text,okLbl,fn){
     b.querySelector('[data-x]').onclick=closeSheet; b.querySelector('[data-ok]').onclick=()=>{ closeSheet(); fn(); };
   });
 }
+function dayDetail(k){
+  settle(Date.now());
+  const [y,m,d]=k.split('-').map(Number), dt=new Date(y,m-1,d), tot=S.log[k]||0;
+  const from=dt.getTime(), to=new Date(y,m-1,d+1).getTime(), ss=sessionsIn(from,to);
+  const mStart=new Date(y,m-1,1), mEnd=new Date(y,m,0); let mt=0,mc=0;
+  for(let i=1;i<=mEnd.getDate();i++){ const v=S.log[y+'-'+pad(m)+'-'+pad(i)]||0; if(v>=60){ mt+=v; mc++; } }
+  const avg=mc?mt/mc:0;
+  let cmp=''; if(tot>=60&&avg>=60&&mc>1){ const r=Math.round((tot/avg-1)*100); cmp = r===0?'ay ortalamasında':'ay ortalamasından %'+Math.abs(r)+(r>0?' fazla':' az'); }
+  const tp=Object.entries(dayTopics(k)).filter(r=>r[1]>=60).sort((a,b)=>b[1]-a[1]);
+  const named=tp.some(r=>r[0]);
+  const hhmm=ts=>{ const x=new Date(ts); return pad(x.getHours())+':'+pad(x.getMinutes()); };
+  const sesSum=ss.reduce((a,x)=>a+x.sec,0), rest=tot-sesSum;
+  let h='<h3>'+d+' '+AYLAR[m-1]+' '+y+', '+GUNLER[dt.getDay()]+'</h3>'+
+    '<div class="dHead"><b>'+(tot>=60?fmtDur(tot):'0 dk')+'</b><span>'+(ss.length?ss.length+' oturum':'')+(cmp?'<br>'+cmp:'')+'</span></div>';
+  if(named) h+='<h4>Konulara göre</h4>'+topicsHtml(Object.fromEntries(tp),'');
+  if(ss.length){ h+='<h4>Oturumlar</h4><div class="sesList">'+ss.map(x=>'<div class="ses"><span class="tm">'+hhmm(x.s)+' – '+(x.open?'devam':hhmm(x.e))+'</span><span class="n">'+(x.l?esc(x.l):'<span style="color:var(--muted)">Adsız</span>')+(x.m==='sw'?' <span style="color:var(--muted)">· krono</span>':'')+'</span><span class="d">'+fmtDur(x.sec)+'</span></div>').join('')+
+      (rest>=60?'<div class="ses"><span class="tm">—</span><span class="n" style="color:var(--muted)">Elle eklenen</span><span class="d">'+fmtDur(rest)+'</span></div>':'')+'</div>'; }
+  else if(tot<60) h+='<p>Bu gün için kayıt yok.</p>';
+  h+='<div class="acts" style="margin-top:12px"><button data-x>Kapat</button><button class="ok" data-ed>Süreyi düzenle</button></div>';
+  openSheet(h,b=>{ b.querySelector('[data-x]').onclick=closeSheet; b.querySelector('[data-ed]').onclick=()=>editDay(k); });
+}
 function editDay(k){
   settle(Date.now());
   const [y,m,d]=k.split('-').map(Number), dt=new Date(y,m-1,d), cur=Math.round((S.log[k]||0)/60);
@@ -692,7 +767,7 @@ $('#editToday').onclick=()=>editDay(dkey(new Date()));
 $('#calSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; calView=b.dataset.cv; renderCal(); window.scrollTo(0,0); });
 $('#prevW').onclick=()=>{ weekOff--; renderWeek(); };
 $('#nextW').onclick=()=>{ if(weekOff<0){ weekOff++; renderWeek(); } };
-$('#bars').addEventListener('click',e=>{ const b=e.target.closest('.bar'); if(b) editDay(b.dataset.k); });
+$('#bars').addEventListener('click',e=>{ const b=e.target.closest('.bar'); if(b) dayDetail(b.dataset.k); });
 function renderLabel(){ const L=(T().label||'').trim(); $('#labelTxt').textContent=L||'Oturum adı ekle'; $('#labelBtn').classList.toggle('has',!!L); }
 $('#labelBtn').onclick=()=>{ const cur=(T().label||'').trim(), rec=recentLabels();
   openSheet('<h3>Oturum adı</h3><p>Ne üzerine çalışıyorsun? Süreler bu adla kaydedilir.</p>'+
@@ -700,14 +775,14 @@ $('#labelBtn').onclick=()=>{ const cur=(T().label||'').trim(), rec=recentLabels(
     (rec.length?'<div class="recent">'+rec.map(n=>'<button data-n="'+esc(n)+'" class="'+(n===cur?'on':'')+'">'+esc(n)+'</button>').join('')+'</div>':'')+
     '<div class="acts"><button data-clr>Adsız</button><button class="ok" data-ok>Tamam</button></div>', b=>{
     const inp=b.querySelector('#lblIn');
-    const apply=v=>{ settle(Date.now()); T().label=(v||'').trim().slice(0,40); save(); closeSheet(); renderLabel(); };
+    const apply=v=>{ settle(Date.now()); closeRun(); T().label=(v||'').trim().slice(0,40); save(); closeSheet(); renderLabel(); };
     b.querySelectorAll('[data-n]').forEach(x=>x.onclick=()=>apply(x.dataset.n));
     b.querySelector('[data-clr]').onclick=()=>apply('');
     b.querySelector('[data-ok]').onclick=()=>apply(inp.value);
     inp.addEventListener('keydown',e=>{ if(e.key==='Enter') apply(inp.value); });
     setTimeout(()=>inp.focus(),150);
   }); };
-$('#grid').addEventListener('click',e=>{ const b=e.target.closest('.day'); if(b) editDay(b.dataset.k); });
+$('#grid').addEventListener('click',e=>{ const b=e.target.closest('.day'); if(b) dayDetail(b.dataset.k); });
 $('#prevM').onclick=()=>{ if(--viewM<0){viewM=11;viewY--;} renderCal(); };
 $('#nextM').onclick=()=>{ if(++viewM>11){viewM=0;viewY++;} renderCal(); };
 
@@ -735,7 +810,7 @@ $('#vol').oninput=e=>{ st().vol=+e.target.value; save(); };
 $('#vol').onchange=()=>playSound(st().sndFocus);
 $$('[data-play]').forEach(b=>b.onclick=()=>playSound(st()[b.dataset.play]));
 
-$('#backupBtn').onclick=()=>{ settle(Date.now()); const data=JSON.stringify({v:2,settings:S.settings,log:S.log,tags:S.tags});
+$('#backupBtn').onclick=()=>{ settle(Date.now()); closeRun(); const data=JSON.stringify({v:3,settings:S.settings,log:S.log,tags:S.tags,ses:S.ses});
   openSheet('<h3>Yedek</h3><p>Bu metni kopyalayıp güvenli bir yere (ör. notlar) kaydet.</p><textarea id="bk" readonly>'+data.replace(/</g,'&lt;')+'</textarea><div class="acts"><button data-x>Kapat</button><button class="ok" data-c>Kopyala</button></div>',b=>{
     const ta=b.querySelector('#bk'); b.querySelector('[data-x]').onclick=closeSheet;
     b.querySelector('[data-c]').onclick=()=>{ ta.select(); let ok=false; try{ ok=document.execCommand('copy'); }catch(e){}
@@ -745,11 +820,11 @@ $('#restoreBtn').onclick=()=>{ openSheet('<h3>Geri yükle</h3><p>Daha önce ald�
   b.querySelector('[data-x]').onclick=closeSheet;
   b.querySelector('[data-ok]').onclick=()=>{ try{ const d=JSON.parse(b.querySelector('#rs').value); if(!d.log||typeof d.log!=='object') throw 0;
       S.log={}; for(const [k,v] of Object.entries(d.log)) if(/^\d{4}-\d\d-\d\d$/.test(k)&&+v>0) S.log[k]=+v;
-      S.tags = d.tags&&typeof d.tags==='object' ? d.tags : {};
+      S.tags = d.tags&&typeof d.tags==='object' ? d.tags : {}; S.ses = Array.isArray(d.ses) ? d.ses : [];
       if(d.settings) S.settings=Object.assign({},DEF,d.settings); save(); closeSheet(); renderSettings(); renderAll(); toast('Yedek yüklendi'); }
     catch(e){ toast('Yedek metni okunamadı'); } };
 }); };
-$('#wipeBtn').onclick=()=>confirmSheet('Tüm kayıtlar silinsin mi?','Takvimdeki bütün çalışma süreleri kalıcı olarak silinir. Ayarların korunur.','Sil',()=>{ S.log={}; S.tags={}; T().last=Date.now(); save(); renderAll(); toast('Kayıtlar silindi'); });
+$('#wipeBtn').onclick=()=>confirmSheet('Tüm kayıtlar silinsin mi?','Takvimdeki bütün çalışma süreleri kalıcı olarak silinir. Ayarların korunur.','Sil',()=>{ S.log={}; S.tags={}; S.ses=[]; T().run=null; T().last=Date.now(); save(); renderAll(); toast('Kayıtlar silindi'); });
 
 /* ---------- döngü ---------- */
 let lastSave=0;

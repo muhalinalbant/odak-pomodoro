@@ -10,8 +10,8 @@ android {
         applicationId "com.odak.pomodoro"
         minSdk 26
         targetSdk 34
-        versionCode 8
-        versionName "1.7"
+        versionCode 9
+        versionName "1.8"
     }
 
     // Sabit imza: yeni sürümler eski uygulamanın üzerine kurulabilsin.
@@ -28,7 +28,8 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.odak
+            // Şifre yoksa (GitHub secret eklenmemişse) geçici debug imzası kullanılır.
+            signingConfig System.getenv('KEYSTORE_PASSWORD') ? signingConfigs.odak : signingConfigs.debug
         }
     }
 
