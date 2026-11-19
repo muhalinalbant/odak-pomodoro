@@ -164,6 +164,26 @@ public class MainActivity extends Activity {
             } catch (Exception ignored) { }
         }
 
+        /** Tema renklerine göre durum/gezinme çubuğu (Siyah tema dahil). */
+        @JavascriptInterface
+        @SuppressWarnings("deprecation")
+        public void setBarsEx(String bgHex, String navHex, boolean dark) {
+            runOnUiThread(() -> {
+                try {
+                    Window w = getWindow();
+                    int bg = android.graphics.Color.parseColor(bgHex);
+                    int nav = android.graphics.Color.parseColor(navHex);
+                    w.setStatusBarColor(bg);
+                    w.setNavigationBarColor(nav);
+                    if (web != null) web.setBackgroundColor(bg);
+                    View d = w.getDecorView();
+                    int lightFlags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                    int f = d.getSystemUiVisibility();
+                    d.setSystemUiVisibility(dark ? (f & ~lightFlags) : (f | lightFlags));
+                } catch (IllegalArgumentException ignored) { }
+            });
+        }
+
         @JavascriptInterface
         public void vibrate(int ms) {
             Vibrator v = getSystemService(Vibrator.class);

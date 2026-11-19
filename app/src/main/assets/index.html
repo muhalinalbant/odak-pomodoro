@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>Odak · Pomodoro</title>
 <script>try{var _t=(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).theme||'auto';
-if(_t==='dark'||(_t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');
+if(_t==='dark'||_t==='black'||(_t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');
+if(_t==='black')document.documentElement.classList.add('black');
 var _c=({domates:['Domates','214,90,74','224,138,60','184,69,95'],okyanus:['Okyanus','61,124,201','47,159,179','90,95,196'],orman:['Orman','52,140,96','106,163,63','42,127,132'],lavanta:['Lavanta','138,99,201','176,101,184','95,106,200'],gul:['Gül','208,87,127','224,122,106','168,90,168'],amber:['Amber','196,132,36','201,162,39','184,97,58'],grafit:['Grafit','110,121,134','118,150,140','108,115,152']})[(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).color];
 if(_c){var _s=document.documentElement.style;_s.setProperty('--ac',_c[1]);_s.setProperty('--sh',_c[2]);_s.setProperty('--lg',_c[3]);}}catch(e){}</script>
 <style>
@@ -17,6 +18,7 @@ if(_c){var _s=document.documentElement.style;_s.setProperty('--ac',_c[1]);_s.set
 }
 html{color-scheme:light}
 html.dark{color-scheme:dark;--bg:#141312;--card:#1d1b19;--text:#f1ede7;--muted:#9a938a;--line:#2c2926;--chip:#26231f;}
+html.dark.black{--bg:#000;--card:#0c0c0c;--text:#f2f2f2;--muted:#8c8c8c;--line:#1f1f1f;--chip:#171717;}
 body[data-ph="short"]{--accent:var(--short);--accent-soft:rgba(var(--sh),.14)}
 body[data-ph="long"]{--accent:var(--long);--accent-soft:rgba(var(--lg),.14)}
 body[data-ph="sw"]{--accent:#7a6a58;--accent-soft:rgba(122,106,88,.14)}
@@ -56,6 +58,15 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .dots i.c{background:var(--accent);opacity:.4}
 .swTime{font-size:clamp(50px,16vw,64px);font-weight:300;text-align:center;font-variant-numeric:tabular-nums;margin:70px 0 10px;letter-spacing:-.02em}
 .swSub{text-align:center;color:var(--muted);font-size:14px;margin-bottom:62px}
+.topBar{display:flex;gap:8px;align-items:center}.topBar .seg{flex:1}
+.gear{width:40px;height:40px;border-radius:12px;background:var(--chip);color:var(--muted);display:grid;place-items:center;flex:none}
+.gear svg{width:21px;height:21px}
+#tset .row+.row,#durCard .row+.row{border-top:1px solid var(--line)}
+#tset .sheetBox{max-height:88vh;overflow:auto}
+#pomoBox{touch-action:pan-y}
+.swipeL{animation:swl .22s}.swipeR{animation:swr .22s}
+@keyframes swl{from{transform:translateX(26px);opacity:.3}to{transform:none;opacity:1}}
+@keyframes swr{from{transform:translateX(-26px);opacity:.3}to{transform:none;opacity:1}}
 
 .controls{display:flex;align-items:center;justify-content:center;gap:26px}
 .primary{background:var(--accent);color:#fff;min-width:148px;padding:15px 0;border-radius:99px;font-size:17px;font-weight:600;
@@ -74,6 +85,16 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .mini .val{font-weight:600;font-variant-numeric:tabular-nums}
 
 /* stats */
+.hbars{display:flex;align-items:flex-end;gap:2px;height:130px;margin-top:18px;position:relative}
+.hbars div{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative}
+.hbars i{width:100%;border-radius:3px 3px 1px 1px;background:var(--focus);min-height:2px;opacity:.9}
+.hbars i.z{background:var(--line);opacity:1}
+.hbars em{position:absolute;font-style:normal;font-size:10.5px;font-weight:700;white-space:nowrap;transform:translateY(-4px)}
+.hax{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px}
+.dActs{display:flex;justify-content:flex-end;margin-top:10px}
+.dActs .btn{padding:8px 14px;font-size:13.5px;border-radius:99px}
+.ses[data-si],.ses[data-rest]{cursor:pointer}
+.ses .ed{color:var(--muted);font-size:13px}
 .calSeg{position:sticky;top:0;z-index:4;background:var(--bg);padding:10px 0 12px;margin-top:-4px}
 .wkHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .wkHead button{width:36px;height:36px;border-radius:50%;font-size:20px;color:var(--muted)}
@@ -106,6 +127,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .topic .d small{display:block;font-size:11px;color:var(--muted);font-weight:500}
 .anGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 10px}
 .anGrid .lbl{font-size:12px;color:var(--muted)}
+.anGrid.empty .val{color:var(--muted)}
 .anGrid .val{font-weight:600;font-size:17px;font-variant-numeric:tabular-nums}
 .dil{display:flex;gap:10px;height:96px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
 .dil div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
@@ -157,8 +179,8 @@ html.dark .day.l1{background:rgba(var(--ac),.22)}html.dark .day.l2{background:rg
 .colors i{width:34px;height:34px;border-radius:50%;display:block;box-shadow:0 0 0 2px var(--card),0 0 0 2px transparent;transition:box-shadow .15s}
 .colors button.on i{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--text)}
 .colors button.on{color:var(--text);font-weight:600}
-.addRow{padding:4px 0 12px}
-.addRow .btn{width:100%}
+.addRow{padding:2px 0 10px}
+.addRow .btn{padding:6px 14px;font-size:13px;border-radius:99px}
 #customList:empty{display:none}
 .snd{display:flex;align-items:center;gap:8px;padding:9px 0}
 .snd+.snd{border-top:1px solid var(--line)}
@@ -233,9 +255,12 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
 
 <!-- ============ ZAMANLAYICI ============ -->
 <section class="view on" id="v-timer"><div class="wrap">
-  <div class="seg" id="modeSeg">
-    <button data-mode="pomo">Pomodoro</button>
-    <button data-mode="sw">Kronometre</button>
+  <div class="topBar">
+    <div class="seg" id="modeSeg">
+      <button data-mode="pomo">Odak</button>
+      <button data-mode="sw">Kronometre</button>
+    </div>
+    <button class="gear" id="gearBtn" aria-label="Zamanlayıcı ayarları"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
   </div>
 
   <div id="pomoBox">
@@ -276,7 +301,28 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
 
 <!-- ============ TAKVİM ============ -->
 <section class="view" id="v-cal"><div class="wrap" style="padding-left:10px;padding-right:10px">
-  <div class="calSeg"><div class="seg" id="calSeg"><button data-cv="week" class="on">Haftalık</button><button data-cv="month">Aylık</button></div></div>
+  <div class="calSeg"><div class="seg" id="calSeg"><button data-cv="day">Günlük</button><button data-cv="week" class="on">Haftalık</button><button data-cv="month">Aylık</button></div></div>
+
+  <div id="dayView" hidden>
+    <div class="card wkBars">
+      <div class="wkHead"><button id="prevD" aria-label="Önceki gün">‹</button><b id="dLabel"></b><button id="nextD" aria-label="Sonraki gün">›</button></div>
+      <div class="wkBig"><div class="v" id="dTot">0 dk</div><div class="s" id="dCmp"></div></div>
+      <div class="hbars" id="hbars"></div>
+      <div class="hax"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+      <div class="wkStats">
+        <div><div class="lbl">Oturum</div><div class="val" id="dN">0</div></div>
+        <div><div class="lbl">İlk başlangıç</div><div class="val" id="dFirst">–</div></div>
+        <div><div class="lbl">Son bitiş</div><div class="val" id="dLast">–</div></div>
+      </div>
+      <div class="note" id="dManNote" style="margin:10px 2px 0"></div>
+    </div>
+    <h2>Oturumlara göre</h2>
+    <div class="card" id="dTopics"></div>
+    <h2>Oturumlar</h2>
+    <div class="card" id="dSes"></div>
+    <div class="dActs"><button class="btn" id="dEdit">Süreyi düzenle</button></div>
+    <p class="note">Bir oturuma dokunarak adını değiştirebilirsin.</p>
+  </div>
 
   <div id="weekView">
     <div class="card wkBars">
@@ -318,22 +364,11 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
 <section class="view" id="v-set"><div class="wrap">
   <h2>Görünüm</h2>
   <div class="card"><div class="seg theme" id="themeSeg">
-    <button data-th="auto">Sistem</button><button data-th="light">Aydınlık</button><button data-th="dark">Karanlık</button>
+    <button data-th="auto">Sistem</button><button data-th="light">Aydınlık</button><button data-th="dark">Karanlık</button><button data-th="black">Siyah</button>
   </div></div>
 
   <div class="card" style="margin-top:10px"><div class="row" style="padding:4px 0"><div class="t">Tema rengi</div></div>
     <div class="colors" id="colorRow"></div></div>
-
-  <h2>Süreler</h2>
-  <div class="card" id="durCard"></div>
-
-  <h2>Otomatik geçiş</h2>
-  <div class="card">
-    <div class="row"><div class="t">Molaları otomatik başlat<small>Odak bitince mola kendiliğinden başlar</small></div>
-      <label class="sw"><input type="checkbox" id="autoBreak"><i></i></label></div>
-    <div class="row"><div class="t">Odağı otomatik başlat<small>Mola bitince yeni odak kendiliğinden başlar</small></div>
-      <label class="sw"><input type="checkbox" id="autoFocus"><i></i></label></div>
-  </div>
 
   <h2>Bildirim sesleri</h2>
   <div class="card">
@@ -366,6 +401,23 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
   <button data-v="set"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Ayarlar</button>
 </nav>
 
+<div class="sheet" id="tset"><div class="sheetBox">
+  <div id="tsetPomo">
+    <h3>Odak ayarları</h3>
+    <div id="durCard"></div>
+    <div class="row"><div class="t">Molaları otomatik başlat<small>Odak bitince mola kendiliğinden başlar</small></div>
+      <label class="sw"><input type="checkbox" id="autoBreak"><i></i></label></div>
+    <div class="row"><div class="t">Odağı otomatik başlat<small>Mola bitince yeni odak kendiliğinden başlar</small></div>
+      <label class="sw"><input type="checkbox" id="autoFocus"><i></i></label></div>
+  </div>
+  <div id="tsetSw">
+    <h3>Kronometre uyarısı</h3>
+    <p>Kronometre çalışırken belirli aralıklarla sesli uyarı verir.</p>
+    <div class="recent" id="swOpts"></div>
+    <div class="row"><div class="t">Kendi aralığın</div><div class="step"><button data-swd="-5">−</button><input inputmode="numeric" id="swEveryIn"><button data-swd="5">+</button><span>dk</span></div></div>
+  </div>
+  <div class="acts" style="margin-top:14px"><button class="ok" id="tsetOk">Tamam</button></div>
+</div></div>
 <div class="sheet" id="sheet"><div class="sheetBox" id="sheetBox"></div></div>
 <div class="toast" id="toast"></div>
 
@@ -375,7 +427,7 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const NB = window.Android || null;          // Android köprüsü (APK içinde)
 const KEY='odak.v1';
-const DEF={focus:25,short:5,long:15,every:4,autoBreak:true,autoFocus:false,sndFocus:'zil',sndBreak:'yumusak',vol:0.7,vibrate:true,theme:'auto',color:'domates'};
+const DEF={focus:25,short:5,long:15,every:4,autoBreak:true,autoFocus:false,sndFocus:'zil',sndBreak:'yumusak',vol:0.7,vibrate:true,theme:'auto',color:'domates',swEvery:0};
 const PH={focus:'Odak',short:'Kısa mola',long:'Uzun mola'};
 const AYLAR=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 const GUNLER=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
@@ -541,7 +593,11 @@ function swElapsed(now){ const t=T(); return t.swAcc+(t.swRun? now-t.swStart:0);
 /* ---------- arka plan bildirimleri (APK) ---------- */
 let hidden=false; const MAXA=12;
 function scheduleAlarms(){
-  if(!NB||!NB.schedule) return; const t=T(); if(t.mode!=='pomo'||!t.running) return;
+  if(!NB||!NB.schedule) return; const t=T();
+  if(t.mode==='sw'){ const E=(st().swEvery||0)*60000; if(!t.swRun||!E) return; const now=Date.now(), el=swElapsed(now);
+    for(let i=0;i<MAXA;i++){ const k=Math.floor(el/E)+1+i, at=now+(k*E-el);
+      try{ NB.schedule(i,at,'Kronometre',fmtDur(k*E/1000)+' oldu','focus',st().vol); }catch(e){} } return; }
+  if(t.mode!=='pomo'||!t.running) return;
   let p=t.phase,c=t.count,end=t.endAt;
   for(let i=0;i<MAXA;i++){
     const [np,nc]=nextOf(p,c), auto=autoFor(np);
@@ -576,6 +632,7 @@ function renderTimer(now){
     document.title = (t.running? fmtClock(left)+' · ':'')+'Odak';
   }else{
     const e=swElapsed(now); $('#swTime').textContent=fmtSw(e);
+    const ev=st().swEvery||0; $('#swSub').textContent = ev ? 'Her '+ev+' dakikada bir uyarı verir' : 'Serbest çalışma · süre bugüne eklenir';
     $('#startBtn').textContent = t.swRun? 'Duraklat' : (t.swAcc>0? 'Devam':'Başlat');
     document.title = (t.swRun? fmtSw(e)+' · ':'')+'Odak';
   }
@@ -591,11 +648,38 @@ function renderTotals(now){
   $('#todayVal').textContent=fmtDur(x.today); $('#weekVal').textContent=fmtDur(x.week); $('#monthVal').textContent=fmtDur(x.month);
 }
 let viewY,viewM; { const d=new Date(); viewY=d.getFullYear(); viewM=d.getMonth(); }
-let calView='week', weekOff=0;
+let calView='week', weekOff=0, dayOff=0;
 function renderCal(){
   $$('#calSeg button').forEach(b=>b.classList.toggle('on',b.dataset.cv===calView));
-  $('#weekView').hidden = calView!=='week'; $('#monthView').hidden = calView!=='month';
-  if(calView==='week') renderWeek(); else renderMonth();
+  $('#dayView').hidden = calView!=='day'; $('#weekView').hidden = calView!=='week'; $('#monthView').hidden = calView!=='month';
+  if(calView==='day') renderDay(); else if(calView==='week') renderWeek(); else renderMonth();
+}
+function renderDay(){
+  settle(Date.now());
+  const now=new Date(), dt=new Date(now.getFullYear(),now.getMonth(),now.getDate()+dayOff), k=dkey(dt), [from,to]=dayBounds(k), tot=S.log[k]||0;
+  $('#dLabel').textContent = dayOff===0?'Bugün':dayOff===-1?'Dün':dt.getDate()+' '+AYLAR[dt.getMonth()]+', '+GUNLER[dt.getDay()];
+  $('#nextD').disabled = dayOff>=0;
+  $('#dTot').textContent=fmtDur(tot);
+  // son 7 günün (çalışılan) ortalamasıyla karşılaştır
+  let pt=0,pc=0; for(let i=1;i<=7;i++){ const v=S.log[dkey(new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()-i))]||0; if(v>=60){pt+=v;pc++;} }
+  const avg=pc?pt/pc:0, r=avg>=60&&tot>=60?Math.round((tot/avg-1)*100):null;
+  $('#dCmp').textContent = tot<60 ? 'Bu gün için kayıt yok' : r===null ? '' : r===0 ? 'Son 7 günün ortalamasında' : 'Son 7 günün ortalamasından %'+Math.abs(r)+(r>0?' fazla':' az');
+  // saatlik dağılım
+  const ss=sessionsIn(from,to), real=ss.filter(x=>x.m!=='man'), hrs=new Array(24).fill(0);
+  real.forEach(x=>{ const span=Math.max(1,x.e-x.s), f=x.sec*1000/span; let a=x.s;
+    while(a<x.e){ const hd=new Date(a); const nx=new Date(hd.getFullYear(),hd.getMonth(),hd.getDate(),hd.getHours()+1).getTime(); const e=Math.min(x.e,nx);
+      if(a>=from&&a<to) hrs[new Date(a).getHours()]+=(e-a)*f/1000; a=e; } });
+  const mx=Math.max(1800,...hrs), mi=hrs.indexOf(Math.max(...hrs));
+  $('#hbars').innerHTML=hrs.map((v,i)=>'<div title="'+pad(i)+':00 · '+fmtDur(v)+'">'+(i===mi&&v>=60?'<em style="bottom:'+(v/mx*84)+'%">'+fmtDur(v)+'</em>':'')+'<i class="'+(v<30?'z':'')+'" style="height:'+(v<30?2:Math.max(4,v/mx*84))+'%"></i></div>').join('');
+  $('#dN').textContent=real.length;
+  $('#dFirst').textContent= real.length? hhmm(real[0].s) : '–';
+  $('#dLast').textContent= real.length? (real[real.length-1].open?'devam':hhmm(real.reduce((a,x)=>Math.max(a,x.e),0))) : '–';
+  const man=tot-real.reduce((a,x)=>a+x.sec,0);
+  $('#dManNote').textContent = man>=60 ? 'Elle eklenen '+fmtDur(man)+' saatlere dağıtılmadı.' : '';
+  $('#dTopics').innerHTML=topicsHtml(dayTopics(k),'');
+  const rows=sesRowsHtml(k);
+  $('#dSes').innerHTML= rows || '<div class="ses" style="opacity:.55"><span class="tm">–</span><span class="n">Henüz oturum yok</span><span class="d">0 dk</span></div>';
+  $('#dSes').dataset.k=k;
 }
 function renderWeek(){
   const now=new Date(), tk=dkey(now), ws=weekStart(now); ws.setDate(ws.getDate()+weekOff*7);
@@ -625,19 +709,19 @@ const DILIM=[['Sabah','05–12'],['Öğle','12–17'],['Akşam','17–22'],['Gec
 const dilimOf=ts=>{ const h=new Date(ts).getHours(); return h>=5&&h<12?0:h>=12&&h<17?1:h>=17&&h<22?2:3; };
 function topicsHtml(agg,emptyMsg){
   const rows=Object.entries(agg).filter(r=>r[1]>=60).sort((a,b)=>b[1]-a[1]); const tot=rows.reduce((a,r)=>a+r[1],0)||1;
-  if(!rows.length) return '<div class="note" style="margin:2px 0">'+emptyMsg+'</div>';
+  if(!rows.length) return '<div class="topic" style="opacity:.55"><div class="n">Kayıt yok</div><div class="tb"><i style="width:0"></i></div><div class="d">0 dk</div></div>'+(emptyMsg?'<div class="note" style="margin:6px 0 0">'+emptyMsg+'</div>':'');
   return rows.map(([n,v])=>'<div class="topic"><div class="n">'+(n?esc(n):'<span style="color:var(--muted)">Adsız</span>')+'</div><div class="tb"><i style="width:'+(v/rows[0][1]*100)+'%"></i></div><div class="d">'+fmtDur(v)+'<small>%'+Math.round(v/tot*100)+'</small></div></div>').join(''); }
 function analysisHtml(fromTs,toTs){
-  const ss=sessionsIn(fromTs,toTs);
-  if(!ss.length) return '<div class="note" style="margin:2px 0">Zamanlayıcıyı kullandıkça oturum sayısı, ortalama oturum süresi ve en verimli saatlerin burada görünür.</div>';
-  const n=ss.length, sum=ss.reduce((a,x)=>a+x.sec,0), longest=ss.reduce((a,x)=>x.sec>a.sec?x:a);
-  const dil=[0,0,0,0]; ss.forEach(x=>dil[dilimOf(x.s)]+=x.sec); const mxD=Math.max(...dil)||1, bestD=dil.indexOf(Math.max(...dil));
-  return '<div class="anGrid">'+
+  const ss=sessionsIn(fromTs,toTs).filter(x=>x.m!=='man'), n=ss.length;
+  const sum=ss.reduce((a,x)=>a+x.sec,0), longest=n?ss.reduce((a,x)=>x.sec>a.sec?x:a):null;
+  const dil=[0,0,0,0]; ss.forEach(x=>dil[dilimOf(x.s)]+=x.sec); const mxD=Math.max(...dil)||1, bestD=n?dil.indexOf(Math.max(...dil)):-1;
+  return '<div class="anGrid'+(n?'':' empty')+'">'+
     '<div><div class="lbl">Oturum</div><div class="val">'+n+'</div></div>'+
-    '<div><div class="lbl">Ortalama oturum</div><div class="val">'+fmtDur(sum/n)+'</div></div>'+
-    '<div><div class="lbl">En uzun oturum</div><div class="val">'+fmtDur(longest.sec)+'</div></div>'+
-    '<div><div class="lbl">En verimli zaman</div><div class="val">'+DILIM[bestD][0]+'</div></div></div>'+
-    '<div class="dil">'+DILIM.map(([a,h],i)=>'<div class="'+(i===bestD?'on':'')+'"><i style="height:'+Math.max(3,dil[i]/mxD*100)+'%"></i><span>'+a+'</span><small>'+h+'</small></div>').join('')+'</div>'; }
+    '<div><div class="lbl">Ortalama oturum</div><div class="val">'+(n?fmtDur(sum/n):'–')+'</div></div>'+
+    '<div><div class="lbl">En uzun oturum</div><div class="val">'+(n?fmtDur(longest.sec):'–')+'</div></div>'+
+    '<div><div class="lbl">En verimli zaman</div><div class="val">'+(n?DILIM[bestD][0]:'–')+'</div></div></div>'+
+    '<div class="dil">'+DILIM.map(([a,h],i)=>'<div class="'+(i===bestD?'on':'')+'"><i style="height:'+(n?Math.max(3,dil[i]/mxD*100):3)+'%"></i><span>'+a+'</span><small>'+h+'</small></div>').join('')+'</div>'+
+    (n?'':'<div class="note" style="margin:10px 0 0">Zamanlayıcıyı kullandıkça burası dolacak.</div>'); }
 function renderMonth(){
   const now=new Date();
   $('#mLabel').textContent=AYLAR[viewM]+' '+viewY;
@@ -672,22 +756,28 @@ const COLORS={domates:['Domates','214,90,74','224,138,60','184,69,95'],okyanus:[
 function applyTheme(){
   const P=COLORS[st().color]||COLORS.domates, R=document.documentElement.style;
   R.setProperty('--ac',P[1]); R.setProperty('--sh',P[2]); R.setProperty('--lg',P[3]);
-  const th=st().theme, dark= th==='dark' || (th==='auto' && MQ && MQ.matches);
-  document.documentElement.classList.toggle('dark',!!dark);
-  try{ if(NB&&NB.setBars) NB.setBars(!!dark); }catch(e){}
+  const th=st().theme, dark= th==='dark' || th==='black' || (th==='auto' && MQ && MQ.matches), black=th==='black';
+  document.documentElement.classList.toggle('dark',!!dark); document.documentElement.classList.toggle('black',black);
+  try{ if(NB&&NB.setBarsEx) NB.setBarsEx(black?'#000000':dark?'#141312':'#F6F3EE', black?'#0C0C0C':dark?'#1D1B19':'#FFFFFF', !!dark);
+       else if(NB&&NB.setBars) NB.setBars(!!dark); }catch(e){}
 }
 if(MQ){ const f=()=>{ if(st().theme==='auto') applyTheme(); }; MQ.addEventListener? MQ.addEventListener('change',f) : MQ.addListener(f); }
 function renderSettings(){
   const s=st();
   $$('#themeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.th===s.theme));
   $('#colorRow').innerHTML=Object.entries(COLORS).map(([k,[ad,c,c2,c3]])=>'<button data-c="'+k+'" class="'+(s.color===k?'on':'')+'"><i style="background:conic-gradient(rgb('+c+') 0 50%,rgb('+c2+') 0 75%,rgb('+c3+') 0)"></i>'+ad+'</button>').join('');
-  renderCustoms();
+  renderCustoms(); renderSettingsRest();
+}
+function renderDurations(){ const s=st();
   const rows=[['focus','Odak süresi','dk',1,180],['short','Kısa mola','dk',1,60],['long','Uzun mola','dk',1,90],['every','Uzun mola aralığı','odak',2,12]];
   $('#durCard').innerHTML=rows.map(([k,l,u,mn,mx])=>
     '<div class="row"><div class="t">'+(k!=='every'?'<i class="pdot" style="background:var(--'+k+')"></i>':'')+l+(k==='every'?'<small>Kaç odaktan sonra uzun mola verilsin</small>':'')+'</div><div class="step">'+
     '<button data-k="'+k+'" data-d="-1">−</button><input inputmode="numeric" data-k="'+k+'" data-min="'+mn+'" data-max="'+mx+'" value="'+s[k]+'">'+
     '<button data-k="'+k+'" data-d="1">+</button><span>'+u+'</span></div></div>').join('');
-  $('#autoBreak').checked=s.autoBreak; $('#autoFocus').checked=s.autoFocus; $('#vibrate').checked=s.vibrate; $('#vol').value=s.vol;
+  $('#autoBreak').checked=s.autoBreak; $('#autoFocus').checked=s.autoFocus;
+}
+function renderSettingsRest(){ const s=st();
+  $('#vibrate').checked=s.vibrate; $('#vol').value=s.vol;
   ['sndFocus','sndBreak'].forEach(id=>{ if(customsLoaded && !soundName(s[id])) s[id]='zil';
     const opt=(k,ad)=>'<option value="'+k+'"'+(s[id]===k?' selected':'')+'>'+esc(ad)+'</option>';
     let h='<optgroup label="Hazır sesler">'+Object.entries(SOUNDS).map(([k,v])=>opt(k,v.ad)).join('')+'</optgroup>';
@@ -707,6 +797,37 @@ function confirmSheet(title,text,okLbl,fn){
     b.querySelector('[data-x]').onclick=closeSheet; b.querySelector('[data-ok]').onclick=()=>{ closeSheet(); fn(); };
   });
 }
+const hhmm=ts=>{ const x=new Date(ts); return pad(x.getHours())+':'+pad(x.getMinutes()); };
+function dayBounds(k){ const [y,m,d]=k.split('-').map(Number); return [new Date(y,m-1,d).getTime(), new Date(y,m-1,d+1).getTime()]; }
+function sesRowsHtml(k){
+  const [from,to]=dayBounds(k), ss=sessionsIn(from,to), tot=S.log[k]||0, rest=tot-ss.reduce((a,x)=>a+x.sec,0);
+  const nm=x=>x.l?esc(x.l):'<span style="color:var(--muted)">Adsız</span>';
+  let h=ss.map(x=>{ const i=x.open?-1:S.ses.indexOf(x);
+    const tm = x.m==='man' ? 'elle eklendi' : hhmm(x.s)+' – '+(x.open?'devam':hhmm(x.e));
+    return '<div class="ses"'+(i>=0?' data-si="'+i+'"':'')+'><span class="tm">'+tm+'</span><span class="n">'+nm(x)+(x.m==='sw'?' <span style="color:var(--muted)">· krono</span>':'')+(i>=0?' <span class="ed">✎</span>':'')+'</span><span class="d">'+fmtDur(x.sec)+'</span></div>'; }).join('');
+  if(rest>=60) h+='<div class="ses" data-rest="'+k+'"><span class="tm">elle eklendi</span><span class="n"><span style="color:var(--muted)">Adsız</span> <span class="ed">✎</span></span><span class="d">'+fmtDur(rest)+'</span></div>';
+  return h; }
+function tagMove(k,from,to,sec){ if(from){ const d=S.tags[k]; if(d&&d[from]!=null){ d[from]-=sec; if(d[from]<1) delete d[from]; } }
+  if(to){ const d=S.tags[k]||(S.tags[k]={}); d[to]=(d[to]||0)+sec; } }
+function pickLabel(title,cur,cb){ const rec=recentLabels();
+  openSheet('<h3>'+title+'</h3><p>Süreler bu adla kaydedilir.</p>'+
+    '<input class="lblIn" id="lblIn" maxlength="40" placeholder="Örn. Sağlık psikolojisi" value="'+esc(cur||'')+'">'+
+    (rec.length?'<div class="recent">'+rec.map(n=>'<button data-n="'+esc(n)+'" class="'+(n===cur?'on':'')+'">'+esc(n)+'</button>').join('')+'</div>':'')+
+    '<div class="acts"><button data-clr>Adsız</button><button class="ok" data-ok>Tamam</button></div>', b=>{
+    const inp=b.querySelector('#lblIn'), done=v=>{ closeSheet(); cb((v||'').trim().slice(0,40)); };
+    b.querySelectorAll('[data-n]').forEach(x=>x.onclick=()=>done(x.dataset.n));
+    b.querySelector('[data-clr]').onclick=()=>done('');
+    b.querySelector('[data-ok]').onclick=()=>done(inp.value);
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter') done(inp.value); });
+  }); }
+function onSesClick(e,after){
+  const r=e.target.closest('[data-si],[data-rest]'); if(!r) return;
+  if(r.dataset.si!=null){ const x=S.ses[+r.dataset.si]; if(!x) return;
+    pickLabel('Oturumun adı',x.l,v=>{ const k=dkey(x.s); tagMove(k,x.l,v,x.sec); x.l=v; save(); after(); toast('Oturum adı güncellendi'); });
+  } else { const k=r.dataset.rest; const [from,to]=dayBounds(k);
+    const rest=(S.log[k]||0)-sessionsIn(from,to).reduce((a,x)=>a+x.sec,0); if(rest<60) return;
+    pickLabel('Elle eklenen sürenin adı','',v=>{ S.ses.push({s:from+12*3600e3,e:from+12*3600e3,l:v,sec:Math.round(rest),m:'man'}); tagMove(k,'',v,rest); save(); after(); toast('Kaydedildi'); });
+  } }
 function dayDetail(k){
   settle(Date.now());
   const [y,m,d]=k.split('-').map(Number), dt=new Date(y,m-1,d), tot=S.log[k]||0;
@@ -717,16 +838,16 @@ function dayDetail(k){
   let cmp=''; if(tot>=60&&avg>=60&&mc>1){ const r=Math.round((tot/avg-1)*100); cmp = r===0?'ay ortalamasında':'ay ortalamasından %'+Math.abs(r)+(r>0?' fazla':' az'); }
   const tp=Object.entries(dayTopics(k)).filter(r=>r[1]>=60).sort((a,b)=>b[1]-a[1]);
   const named=tp.some(r=>r[0]);
-  const hhmm=ts=>{ const x=new Date(ts); return pad(x.getHours())+':'+pad(x.getMinutes()); };
-  const sesSum=ss.reduce((a,x)=>a+x.sec,0), rest=tot-sesSum;
+
   let h='<h3>'+d+' '+AYLAR[m-1]+' '+y+', '+GUNLER[dt.getDay()]+'</h3>'+
     '<div class="dHead"><b>'+(tot>=60?fmtDur(tot):'0 dk')+'</b><span>'+(ss.length?ss.length+' oturum':'')+(cmp?'<br>'+cmp:'')+'</span></div>';
   if(named) h+='<h4>Konulara göre</h4>'+topicsHtml(Object.fromEntries(tp),'');
-  if(ss.length){ h+='<h4>Oturumlar</h4><div class="sesList">'+ss.map(x=>'<div class="ses"><span class="tm">'+hhmm(x.s)+' – '+(x.open?'devam':hhmm(x.e))+'</span><span class="n">'+(x.l?esc(x.l):'<span style="color:var(--muted)">Adsız</span>')+(x.m==='sw'?' <span style="color:var(--muted)">· krono</span>':'')+'</span><span class="d">'+fmtDur(x.sec)+'</span></div>').join('')+
-      (rest>=60?'<div class="ses"><span class="tm">—</span><span class="n" style="color:var(--muted)">Elle eklenen</span><span class="d">'+fmtDur(rest)+'</span></div>':'')+'</div>'; }
+  const rows=sesRowsHtml(k);
+  if(rows){ h+='<h4>Oturumlar</h4><div class="sesList">'+rows+'</div><p style="margin:-6px 0 4px;font-size:12px">Ada dokunarak değiştirebilirsin.</p>'; }
   else if(tot<60) h+='<p>Bu gün için kayıt yok.</p>';
   h+='<div class="acts" style="margin-top:12px"><button data-x>Kapat</button><button class="ok" data-ed>Süreyi düzenle</button></div>';
-  openSheet(h,b=>{ b.querySelector('[data-x]').onclick=closeSheet; b.querySelector('[data-ed]').onclick=()=>editDay(k); });
+  openSheet(h,b=>{ b.querySelector('[data-x]').onclick=closeSheet; b.querySelector('[data-ed]').onclick=()=>editDay(k);
+    b.querySelector('.sesList')&&b.querySelector('.sesList').addEventListener('click',e=>onSesClick(e,()=>{ dayDetail(k); if(view==='cal') renderCal(); })); });
 }
 function editDay(k){
   settle(Date.now());
@@ -736,13 +857,22 @@ function editDay(k){
   openSheet('<h3>'+d+' '+AYLAR[m-1]+' '+y+', '+GUNLER[dt.getDay()]+'</h3><p>Bu gün için toplam odak süresi</p>'+tpH+
     '<div class="hm"><label><input id="eh" inputmode="numeric" value="'+Math.floor(cur/60)+'">saat</label><b>:</b><label><input id="em" inputmode="numeric" value="'+(cur%60)+'">dakika</label></div>'+
     '<div class="quick"><button data-q="-15">−15 dk</button><button data-q="15">+15 dk</button><button data-q="25">+25 dk</button><button data-q="60">+1 sa</button></div>'+
+    '<input class="lblIn" id="elbl" maxlength="40" placeholder="Eklenen sürenin adı (isteğe bağlı)" value="'+esc((T().label||'').trim())+'" style="font-size:15px;padding:10px 12px">'+
+    (recentLabels().length?'<div class="recent" id="erec">'+recentLabels().map(n=>'<button data-n="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>':'')+
     '<div class="acts"><button data-del>Sıfırla</button><button class="ok" data-ok>Kaydet</button></div>', b=>{
+    const EL=b.querySelector('#elbl'); b.querySelectorAll('#erec [data-n]').forEach(x=>x.onclick=()=>{ EL.value=x.dataset.n; });
     const H=b.querySelector('#eh'), M=b.querySelector('#em');
     const get=()=>Math.max(0,(parseInt(H.value)||0)*60+(parseInt(M.value)||0));
     const set=v=>{ v=Math.max(0,Math.min(24*60,v)); H.value=Math.floor(v/60); M.value=v%60; };
     b.querySelectorAll('[data-q]').forEach(q=>q.onclick=()=>set(get()+ +q.dataset.q));
     b.querySelector('[data-del]').onclick=()=>set(0);
-    b.querySelector('[data-ok]').onclick=()=>{ const v=Math.min(24*60,get()); if(v>0) S.log[k]=v*60; else delete S.log[k];
+    b.querySelector('[data-ok]').onclick=()=>{ const v=Math.min(24*60,get()), old=S.log[k]||0, delta=v*60-old, L=(EL.value||'').trim().slice(0,40);
+      const [from,to]=dayBounds(k);
+      if(delta>=60){ const at=Math.min(Math.max(Date.now(),from),to-1); S.ses.push({s:at,e:at,l:L,sec:Math.round(delta),m:'man'}); tagMove(k,'',L,delta); }
+      else if(delta<0){ let cut=-delta; // önce elle eklenenlerden düş
+        for(let i=S.ses.length-1;i>=0&&cut>0;i--){ const x=S.ses[i]; if(x.m!=='man'||x.s<from||x.s>=to) continue;
+          const c=Math.min(cut,x.sec); x.sec-=c; cut-=c; tagMove(k,x.l,'',c); if(x.sec<60) S.ses.splice(i,1); } }
+      if(v>0) S.log[k]=v*60; else { delete S.log[k]; delete S.tags[k]; S.ses=S.ses.filter(x=>x.s<from||x.s>=to); }
       T().last=Date.now(); save(); closeSheet(); renderAll(); if(view==='cal') renderCal(); toast('Kaydedildi'); };
   });
 }
@@ -755,33 +885,46 @@ $('#nav').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!
 $('#modeSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const t=T(); if(t.mode===b.dataset.mode) return;
   if(t.mode==='pomo') pausePomo(); else pauseSw(); t.mode=b.dataset.mode; save(); renderAll(); });
 $('#phaseChips').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const t=T();
-  settle(Date.now()); t.running=false; t.phase=b.dataset.phase; t.remaining=null; save(); renderAll(); });
+  settle(Date.now()); closeRun(); t.running=false; t.phase=b.dataset.phase; t.remaining=null; save(); renderAll(); });
 $('#startBtn').onclick=()=>{ const t=T();
   if(t.mode==='pomo'){ t.running? pausePomo(): startPomo(); } else { t.swRun? pauseSw(): startSw(); } save(); renderAll(); };
 $('#resetBtn').onclick=()=>{ const t=T(), now=Date.now(); settle(now);
-  if(t.mode==='pomo'){ t.running=false; t.remaining=null; } else { t.swAcc=0; if(t.swRun){ t.swStart=now; t.last=now; } }
+  if(t.mode==='pomo'){ t.running=false; t.remaining=null; } else { closeRun(); t.swAcc=0; t.swN=0; if(t.swRun){ t.swStart=now; t.last=now; } }
   save(); renderAll(); };
 $('#skipBtn').onclick=()=>{ const t=T(), now=Date.now(); settle(now);
   advance(now,false); save(); renderAll(); };
+function swOptsRender(){ const v=st().swEvery||0;
+  $('#swOpts').innerHTML=[0,10,15,20,25,30,45,60].map(m=>'<button data-sw="'+m+'" class="'+(v===m?'on':'')+'">'+(m?'Her '+m+' dk':'Kapalı')+'</button>').join('');
+  $('#swEveryIn').value=v||''; $('#swEveryIn').placeholder='–'; }
+function setSwEvery(m){ m=Math.max(0,Math.min(600,Math.round(m)||0)); st().swEvery=m; const t=T(); t.swN=Math.floor(swElapsed(Date.now())/((m||1)*60000)); save(); swOptsRender(); renderTimer(Date.now()); }
+$('#gearBtn').onclick=()=>{ const pomo=T().mode==='pomo'; $('#tsetPomo').hidden=!pomo; $('#tsetSw').hidden=pomo;
+  if(pomo) renderDurations(); else swOptsRender(); $('#tset').classList.add('on'); };
+$('#tsetOk').onclick=()=>$('#tset').classList.remove('on');
+$('#tset').addEventListener('click',e=>{ if(e.target.id==='tset') $('#tset').classList.remove('on'); });
+$('#swOpts').addEventListener('click',e=>{ const b=e.target.closest('[data-sw]'); if(b) setSwEvery(+b.dataset.sw); });
+$('#tsetSw').addEventListener('click',e=>{ const b=e.target.closest('[data-swd]'); if(b) setSwEvery((st().swEvery||0)+ +b.dataset.swd); });
+$('#swEveryIn').onchange=e=>setSwEvery(parseInt(e.target.value));
+/* odak ↔ kısa mola ↔ uzun mola arasında kaydırma */
+(()=>{ const PHS=['focus','short','long']; let x0=null,y0=0;
+  const box=$('#pomoBox');
+  box.addEventListener('touchstart',e=>{ const t=e.touches[0]; x0=t.clientX; y0=t.clientY; },{passive:true});
+  box.addEventListener('touchend',e=>{ if(x0==null) return; const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
+    if(Math.abs(dx)<50||Math.abs(dy)>Math.abs(dx)*0.7) return;
+    const tt=T(); let i=PHS.indexOf(tt.phase)+(dx<0?1:-1); if(i<0||i>2) return;
+    settle(Date.now()); closeRun(); tt.running=false; tt.phase=PHS[i]; tt.remaining=null; save(); renderAll();
+    const ring=box.querySelector('.ring'); ring.classList.remove('swipeL','swipeR'); void ring.offsetWidth; ring.classList.add(dx<0?'swipeL':'swipeR'); });
+})();
 $('#editToday').onclick=()=>editDay(dkey(new Date()));
 $('#calSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; calView=b.dataset.cv; renderCal(); window.scrollTo(0,0); });
+$('#prevD').onclick=()=>{ dayOff--; renderDay(); };
+$('#nextD').onclick=()=>{ if(dayOff<0){ dayOff++; renderDay(); } };
+$('#dSes').addEventListener('click',e=>onSesClick(e,renderDay));
+$('#dEdit').onclick=()=>editDay($('#dSes').dataset.k);
 $('#prevW').onclick=()=>{ weekOff--; renderWeek(); };
 $('#nextW').onclick=()=>{ if(weekOff<0){ weekOff++; renderWeek(); } };
 $('#bars').addEventListener('click',e=>{ const b=e.target.closest('.bar'); if(b) dayDetail(b.dataset.k); });
 function renderLabel(){ const L=(T().label||'').trim(); $('#labelTxt').textContent=L||'Oturum adı ekle'; $('#labelBtn').classList.toggle('has',!!L); }
-$('#labelBtn').onclick=()=>{ const cur=(T().label||'').trim(), rec=recentLabels();
-  openSheet('<h3>Oturum adı</h3><p>Ne üzerine çalışıyorsun? Süreler bu adla kaydedilir.</p>'+
-    '<input class="lblIn" id="lblIn" maxlength="40" placeholder="Örn. Sağlık psikolojisi" value="'+esc(cur)+'">'+
-    (rec.length?'<div class="recent">'+rec.map(n=>'<button data-n="'+esc(n)+'" class="'+(n===cur?'on':'')+'">'+esc(n)+'</button>').join('')+'</div>':'')+
-    '<div class="acts"><button data-clr>Adsız</button><button class="ok" data-ok>Tamam</button></div>', b=>{
-    const inp=b.querySelector('#lblIn');
-    const apply=v=>{ settle(Date.now()); closeRun(); T().label=(v||'').trim().slice(0,40); save(); closeSheet(); renderLabel(); };
-    b.querySelectorAll('[data-n]').forEach(x=>x.onclick=()=>apply(x.dataset.n));
-    b.querySelector('[data-clr]').onclick=()=>apply('');
-    b.querySelector('[data-ok]').onclick=()=>apply(inp.value);
-    inp.addEventListener('keydown',e=>{ if(e.key==='Enter') apply(inp.value); });
-    setTimeout(()=>inp.focus(),150);
-  }); };
+$('#labelBtn').onclick=()=>pickLabel('Oturum adı',(T().label||'').trim(),v=>{ settle(Date.now()); closeRun(); T().label=v; save(); renderLabel(); });
 $('#grid').addEventListener('click',e=>{ const b=e.target.closest('.day'); if(b) dayDetail(b.dataset.k); });
 $('#prevM').onclick=()=>{ if(--viewM<0){viewM=11;viewY--;} renderCal(); };
 $('#nextM').onclick=()=>{ if(++viewM>11){viewM=0;viewY++;} renderCal(); };
@@ -828,7 +971,10 @@ $('#wipeBtn').onclick=()=>confirmSheet('Tüm kayıtlar silinsin mi?','Takvimdeki
 
 /* ---------- döngü ---------- */
 let lastSave=0;
-function loop(){ const now=Date.now(); if(settle(now)) save(); if(now-lastSave>5000){ save(); lastSave=now; } if(!hidden) renderTimer(now); }
+function swAlertCheck(now){ const t=T(), E=(st().swEvery||0)*60000; if(t.mode!=='sw'||!t.swRun||!E) return;
+  const n=Math.floor(swElapsed(now)/E); if(t.swN==null) t.swN=n;
+  if(n>t.swN){ t.swN=n; if(!(hidden&&NB)){ playSound(st().sndFocus); buzz(); toast('Kronometre: '+fmtDur(n*E/1000)+' oldu'); } save(); } }
+function loop(){ const now=Date.now(); if(settle(now)) save(); swAlertCheck(now); if(now-lastSave>5000){ save(); lastSave=now; } if(!hidden) renderTimer(now); }
 applyTheme(); settle(Date.now()); renderAll(); renderLabel(); save();
 loadCustoms().then(()=>{ if(view==='set') renderSettings(); exportAll(); });
 setInterval(loop,250);
