@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>Odak · Pomodoro</title>
 <script>try{var _t=(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).theme||'auto';
-if(_t==='dark'||(_t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){}</script>
+if(_t==='dark'||(_t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');
+var _c={domates:'214,90,74',okyanus:'61,124,201',orman:'52,140,96',lavanta:'138,99,201',gul:'208,87,127',amber:'196,132,36',grafit:'110,121,134'}[(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).color];
+if(_c){document.documentElement.style.setProperty('--ac',_c);document.documentElement.style.setProperty('--focus','rgb('+_c+')');}}catch(e){}</script>
 <style>
 :root{
   --bg:#f6f3ee; --card:#ffffff; --text:#1f1d1a; --muted:#8a847b; --line:#ebe5dc; --chip:#efeae2;
-  --focus:#d65a4a; --short:#2f9a8a; --long:#4a72c4;
-  --accent:var(--focus); --accent-soft:rgba(214,90,74,.13);
+  --ac:214,90,74; --focus:#d65a4a; --short:#2f9a8a; --long:#4a72c4;
+  --accent:var(--focus); --accent-soft:rgba(var(--ac),.13);
   --r:18px;
 }
 html{color-scheme:light}
@@ -83,14 +85,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .calHead button{width:36px;height:36px;border-radius:50%;font-size:20px;color:var(--muted)}
 .wk,.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
 .wk span{font-size:11px;color:var(--muted);padding-bottom:4px}
-.grid{gap:5px 4px}
-.day{min-height:62px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:7px;font-size:13px;color:var(--muted);position:relative}
-.day .dur{margin-top:4px;font-size:11.5px;font-weight:700;color:var(--text);line-height:1.15;font-variant-numeric:tabular-nums;text-align:center}
-.day .dur span{display:block;font-weight:600;font-size:10.5px}
-.day.l1{background:rgba(214,90,74,.12)}.day.l2{background:rgba(214,90,74,.26)}.day.l3{background:rgba(214,90,74,.45)}.day.l4{background:rgba(214,90,74,.68)}
-html.dark .day.l1{background:rgba(214,90,74,.20)}html.dark .day.l2{background:rgba(214,90,74,.36)}html.dark .day.l3{background:rgba(214,90,74,.55)}html.dark .day.l4{background:rgba(214,90,74,.78)}
-.day[class*=" l"]{color:var(--text)}
-.day.l4 .dur{color:#fff}html:not(.dark) .day.l4{color:#fff}
+.grid{gap:5px 3px}
+.day{min-height:56px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8px;font-size:13.5px;color:var(--text);position:relative}
+.day .dur{margin-top:5px;font-size:9.5px;font-weight:700;color:var(--text);white-space:nowrap;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+.day.l1{background:rgba(var(--ac),.13)}.day.l2{background:rgba(var(--ac),.26)}.day.l3{background:rgba(var(--ac),.40)}.day.l4{background:rgba(var(--ac),.55)}
+html.dark .day.l1{background:rgba(var(--ac),.22)}html.dark .day.l2{background:rgba(var(--ac),.34)}html.dark .day.l3{background:rgba(var(--ac),.47)}html.dark .day.l4{background:rgba(var(--ac),.60)}
 .legend{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:12px;font-size:11px;color:var(--muted);flex-wrap:wrap}
 .legend i{width:14px;height:14px;border-radius:4px;display:inline-block;background:var(--chip)}
 .legend i.day{min-height:0;padding:0}
@@ -99,6 +98,15 @@ html.dark .day.l1{background:rgba(214,90,74,.20)}html.dark .day.l2{background:rg
 .dayInfo .lbl{font-size:12.5px;color:var(--muted)}
 .dayInfo .val{font-size:18px;font-weight:700}
 .theme{margin-top:2px}
+.colors{display:flex;flex-wrap:wrap;gap:12px;padding:4px 0 8px}
+.colors button{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--muted);width:44px}
+.colors i{width:34px;height:34px;border-radius:50%;display:block;box-shadow:0 0 0 2px var(--card),0 0 0 2px transparent;transition:box-shadow .15s}
+.colors button.on i{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--text)}
+.colors button.on{color:var(--text);font-weight:600}
+.snd{display:flex;align-items:center;gap:8px;padding:9px 0}
+.snd+.snd{border-top:1px solid var(--line)}
+.snd .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.del{width:34px;height:34px;border-radius:50%;background:var(--chip);color:#c0392b;font-size:18px;flex:none}
 .day.td{box-shadow:inset 0 0 0 1.5px var(--focus)}
 .day.fut{opacity:.45}
 .mTotal{display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
@@ -108,7 +116,7 @@ html.dark .day.l1{background:rgba(214,90,74,.20)}html.dark .day.l2{background:rg
 .bar i{width:100%;max-width:26px;border-radius:6px 6px 3px 3px;background:var(--focus);opacity:.85;min-height:2px}
 .bar.td i{opacity:1}
 .bar span{font-size:11px;color:var(--muted)}
-.bar em{font-style:normal;font-size:10.5px;font-weight:600;color:var(--text);text-align:center;line-height:1.15;font-variant-numeric:tabular-nums}.bar em span{display:block;font-weight:500;color:var(--muted)}
+.bar em{font-style:normal;font-size:10px;white-space:nowrap;letter-spacing:-.25px;font-weight:600;color:var(--text);text-align:center;line-height:1.15;font-variant-numeric:tabular-nums}
 .bars{height:140px}
 
 /* settings */
@@ -217,7 +225,7 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
   </div>
 
   <h2>Takvim</h2>
-  <div class="card">
+  <div class="card" style="padding:14px 10px">
     <div class="calHead"><button id="prevM" aria-label="Önceki ay">‹</button><b id="mLabel"></b><button id="nextM" aria-label="Sonraki ay">›</button></div>
     <div class="wk"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
     <div class="grid" id="grid"></div>
@@ -239,6 +247,9 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
     <button data-th="auto">Sistem</button><button data-th="light">Aydınlık</button><button data-th="dark">Karanlık</button>
   </div></div>
 
+  <div class="card" style="margin-top:10px"><div class="row" style="padding:4px 0"><div class="t">Tema rengi</div></div>
+    <div class="colors" id="colorRow"></div></div>
+
   <h2>Süreler</h2>
   <div class="card" id="durCard"></div>
 
@@ -259,6 +270,14 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
     <div class="row"><div class="t">Ses düzeyi</div><input type="range" id="vol" min="0" max="1" step="0.05"></div>
     <div class="row"><div class="t">Titreşim</div><label class="sw"><input type="checkbox" id="vibrate"><i></i></label></div>
   </div>
+
+  <h2>Kendi seslerim</h2>
+  <div class="card">
+    <div id="customList"></div>
+    <div class="row" style="border-top:1px solid var(--line);margin-top:6px"><div class="t">Telefondan ses dosyası ekle<small>MP3, M4A, OGG, WAV · en fazla 5 MB</small></div>
+      <button class="btn" id="addSnd">+ Ekle</button><input type="file" id="sndFile" accept="audio/*" hidden></div>
+  </div>
+  <p class="note">Eklediğin sesler yukarıdaki "Odak bitince" ve "Mola bitince" listelerinde görünür.</p>
   <p class="note" id="bgNote">Uygulama arka plandayken süre bitince telefonun bildirim sesiyle haber verilir.</p>
 
   <h2>Veriler</h2>
@@ -287,7 +306,7 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const NB = window.Android || null;          // Android köprüsü (APK içinde)
 const KEY='odak.v1';
-const DEF={focus:25,short:5,long:15,every:4,autoBreak:true,autoFocus:false,sndFocus:'zil',sndBreak:'yumusak',vol:0.7,vibrate:true,theme:'auto'};
+const DEF={focus:25,short:5,long:15,every:4,autoBreak:true,autoFocus:false,sndFocus:'zil',sndBreak:'yumusak',vol:0.7,vibrate:true,theme:'auto',color:'domates'};
 const PH={focus:'Odak',short:'Kısa mola',long:'Uzun mola'};
 const AYLAR=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 const GUNLER=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
@@ -312,7 +331,7 @@ function fmtDur(sec){ sec=Math.round(sec/60)*60; const h=Math.floor(sec/3600), m
   if(h&&m) return h+' sa '+m+' dk'; if(h) return h+' sa'; return m+' dk'; }
 function fmtCell(sec){ const mm=Math.round(sec/60); if(mm<=0) return '';
   const h=Math.floor(mm/60), m=mm%60;
-  if(!h) return m+' dk'; if(!m) return h+' sa'; return h+' sa<span>'+m+' dk</span>'; }
+  if(!h) return m+' dk'; if(!m) return h+' sa'; return h+'sa '+m+'dk'; }
 function fmtShort(sec){ const mm=Math.round(sec/60); if(mm<=0) return ''; const h=Math.floor(mm/60), m=mm%60; return h? h+':'+pad(m) : m+'dk'; }
 function fmtClock(ms){ const s=Math.max(0,Math.ceil(ms/1000)); const m=Math.floor(s/60); return pad(m)+':'+pad(s%60); }
 function fmtSw(ms){ const s=Math.floor(ms/1000); return Math.floor(s/3600)+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60); }
@@ -345,9 +364,35 @@ const SOUNDS={
   dijital:{ad:'Dijital alarm', fn:(c,o)=>{ [0,.12,.24,.36,.8,.92,1.04,1.16].forEach(t=>tone(c,o,{f:1568,t,d:.09,type:'square',g:.13,a:.003})); }},
   kus:{ad:'Kuş cıvıltısı', fn:(c,o)=>{ [0,.18,.36,.75,.93].forEach((t,i)=>tone(c,o,{f:2200+i*120,f2:3400,t,d:.14,g:.25,a:.005})); }},
   marimba:{ad:'Marimba', fn:(c,o)=>{ [523.3,659.3,784,1046.5].forEach((f,i)=>{ tone(c,o,{f,t:i*.16,d:.6,g:.45,a:.004}); tone(c,o,{f:f*4,t:i*.16,d:.12,g:.08,a:.002}); }); }},
+  kapi:{ad:'Kapı zili', fn:(c,o)=>{ tone(c,o,{f:659.3,d:1.2,g:.5}); tone(c,o,{f:659.3*2,d:.5,g:.08}); tone(c,o,{f:523.3,t:.55,d:1.8,g:.5}); tone(c,o,{f:523.3*2,t:.55,d:.6,g:.08}); }},
+  kase:{ad:'Tibet kâsesi', fn:(c,o)=>{ tone(c,o,{f:392,d:5,g:.45,a:.04}); tone(c,o,{f:394.5,d:5,g:.35,a:.04}); tone(c,o,{f:392*2.71,d:3.2,g:.12,a:.04}); tone(c,o,{f:392*5.1,d:1.6,g:.04,a:.04}); }},
+  ruzgar:{ad:'Rüzgâr çanı', fn:(c,o)=>{ [1568,2093,1760,2349,1975,2637,2093].forEach((f,i)=>{ const t=i*.17+(i%2)*.05; tone(c,o,{f,t,d:1.6,g:.16,a:.003}); tone(c,o,{f:f*2.4,t,d:.5,g:.04,a:.003}); }); }},
+  arp:{ad:'Arp', fn:(c,o)=>{ [392,493.9,587.3,784,987.8,1174.7].forEach((f,i)=>{ tone(c,o,{f,t:i*.09,d:1.6,type:'triangle',g:.32,a:.003}); }); }},
+  damla:{ad:'Su damlası', fn:(c,o)=>{ [0,.35,.6].forEach((t,i)=>tone(c,o,{f:1400-i*180,f2:520,t,d:.22,g:.45,a:.002})); }},
+  kristal:{ad:'Kristal', fn:(c,o)=>{ [2093,2637,3136,4186].forEach((f,i)=>{ tone(c,o,{f,t:i*.07,d:1.3,g:.13,a:.002}); }); tone(c,o,{f:1046.5,d:1.8,g:.15}); }},
+  akor:{ad:'Piyano akoru', fn:(c,o)=>{ [261.6,329.6,392,523.3].forEach((f,i)=>{ tone(c,o,{f,t:i*.02,d:2.2,type:'triangle',g:.3,a:.004}); tone(c,o,{f:f*2,t:i*.02,d:.8,g:.06,a:.004}); }); }},
+  telefon:{ad:'Eski telefon', fn:(c,o)=>{ for(let i=0;i<14;i++){ tone(c,o,{f:i%2?1300:1050,t:i*.05,d:.05,type:'square',g:.08,a:.002}); tone(c,o,{f:i%2?1300:1050,t:.9+i*.05,d:.05,type:'square',g:.08,a:.002}); } }},
+  retro:{ad:'Retro oyun', fn:(c,o)=>{ [523.3,659.3,784,1046.5,1318.5].forEach((f,i)=>tone(c,o,{f,t:i*.08,d:.12,type:'square',g:.1,a:.002})); tone(c,o,{f:1568,t:.42,d:.4,type:'square',g:.1,a:.002}); }},
+  nazik:{ad:'Nazik hatırlatma', fn:(c,o)=>{ tone(c,o,{f:880,d:.9,g:.3,a:.03}); tone(c,o,{f:1174.7,t:.25,d:1.2,g:.25,a:.03}); }},
   yok:{ad:'Sessiz', fn:()=>{}}
 };
+/* --- kullanıcının kendi sesleri (IndexedDB) --- */
+const SDB={db:null,
+  open(){ return new Promise((res,rej)=>{ if(this.db) return res(this.db); if(!window.indexedDB) return rej('yok');
+    const r=indexedDB.open('odak-sesler',1); r.onupgradeneeded=()=>r.result.createObjectStore('s',{keyPath:'id'});
+    r.onsuccess=()=>{ this.db=r.result; res(this.db); }; r.onerror=()=>rej(r.error); }); },
+  async tx(mode,fn){ const db=await this.open(); return new Promise((res,rej)=>{ const t=db.transaction('s',mode), q=fn(t.objectStore('s'));
+    t.oncomplete=()=>res(q&&q.result); t.onerror=()=>rej(t.error); }); },
+  all(){ return this.tx('readonly',o=>o.getAll()); }, put(x){ return this.tx('readwrite',o=>o.put(x)); }, del(id){ return this.tx('readwrite',o=>o.delete(id)); }
+};
+let customs=[], customsLoaded=false; const curls={}; let curAudio=null;
+async function loadCustoms(){ try{ customs=(await SDB.all())||[]; customs.forEach(c=>{ if(!curls[c.id]) curls[c.id]=URL.createObjectURL(new Blob([c.data],{type:c.type||'audio/mpeg'})); }); }catch(e){ customs=[]; } customsLoaded=true; }
+function soundName(k){ if(k.startsWith('c:')){ const c=customs.find(x=>'c:'+x.id===k); return c?c.name:null; } return SOUNDS[k]?SOUNDS[k].ad:null; }
 function playSound(name){
+  if(name&&name.startsWith('c:')){
+    const u=curls[name.slice(2)]; if(!u){ name='zil'; }
+    else { try{ if(curAudio) curAudio.pause(); const a=new Audio(u); a.volume=Math.min(1,st().vol); curAudio=a; a.play().catch(()=>{}); setTimeout(()=>{ if(curAudio===a) a.pause(); },15000); }catch(e){} return; }
+  }
   const s=SOUNDS[name]; if(!s||name==='yok') return; const c=ac(); if(!c) return;
   const m=c.createGain(); m.gain.value=st().vol*0.9; m.connect(c.destination); s.fn(c,m);
 }
@@ -464,8 +509,18 @@ function renderCal(){
   const mx=Math.max(3600,...vals.map(v=>v[1])); const lb=['Pt','Sa','Ça','Pe','Cu','Ct','Pz'];
   $('#bars').innerHTML=vals.map(([d,s],i)=>'<div class="bar'+(dkey(d)===tk?' td':'')+'"><em>'+fmtCell(s)+'</em><i style="height:'+(s/mx*82)+'%"></i><span>'+lb[i]+'</span></div>').join('');
 }
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function renderCustoms(){
+  $('#customList').innerHTML = customs.length ? customs.map(c=>'<div class="snd"><div class="t">🎵 '+esc(c.name)+'</div>'+
+    '<button class="play" data-cp="'+c.id+'"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg></button>'+
+    '<button class="del" data-cd="'+c.id+'" aria-label="Sil">×</button></div>').join('') : '<div class="note" style="margin:4px 0 2px">Henüz eklenmiş ses yok.</div>';
+}
 const MQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+const COLORS={domates:['Domates','214,90,74'],okyanus:['Okyanus','61,124,201'],orman:['Orman','52,140,96'],lavanta:['Lavanta','138,99,201'],
+  gul:['Gül','208,87,127'],amber:['Amber','196,132,36'],grafit:['Grafit','110,121,134']};
 function applyTheme(){
+  const c=(COLORS[st().color]||COLORS.domates)[1], R=document.documentElement.style;
+  R.setProperty('--ac',c); R.setProperty('--focus','rgb('+c+')');
   const th=st().theme, dark= th==='dark' || (th==='auto' && MQ && MQ.matches);
   document.documentElement.classList.toggle('dark',!!dark);
   try{ if(NB&&NB.setBars) NB.setBars(!!dark); }catch(e){}
@@ -474,13 +529,19 @@ if(MQ){ const f=()=>{ if(st().theme==='auto') applyTheme(); }; MQ.addEventListen
 function renderSettings(){
   const s=st();
   $$('#themeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.th===s.theme));
+  $('#colorRow').innerHTML=Object.entries(COLORS).map(([k,[ad,c]])=>'<button data-c="'+k+'" class="'+(s.color===k?'on':'')+'"><i style="background:rgb('+c+')"></i>'+ad+'</button>').join('');
+  renderCustoms();
   const rows=[['focus','Odak süresi','dk',1,180],['short','Kısa mola','dk',1,60],['long','Uzun mola','dk',1,90],['every','Uzun mola aralığı','odak',2,12]];
   $('#durCard').innerHTML=rows.map(([k,l,u,mn,mx])=>
     '<div class="row"><div class="t">'+l+(k==='every'?'<small>Kaç odaktan sonra uzun mola verilsin</small>':'')+'</div><div class="step">'+
     '<button data-k="'+k+'" data-d="-1">−</button><input inputmode="numeric" data-k="'+k+'" data-min="'+mn+'" data-max="'+mx+'" value="'+s[k]+'">'+
     '<button data-k="'+k+'" data-d="1">+</button><span>'+u+'</span></div></div>').join('');
   $('#autoBreak').checked=s.autoBreak; $('#autoFocus').checked=s.autoFocus; $('#vibrate').checked=s.vibrate; $('#vol').value=s.vol;
-  ['sndFocus','sndBreak'].forEach(id=>{ $('#'+id).innerHTML=Object.entries(SOUNDS).map(([k,v])=>'<option value="'+k+'"'+(s[id]===k?' selected':'')+'>'+v.ad+'</option>').join(''); });
+  ['sndFocus','sndBreak'].forEach(id=>{ if(customsLoaded && !soundName(s[id])) s[id]='zil';
+    const opt=(k,ad)=>'<option value="'+k+'"'+(s[id]===k?' selected':'')+'>'+esc(ad)+'</option>';
+    let h='<optgroup label="Hazır sesler">'+Object.entries(SOUNDS).map(([k,v])=>opt(k,v.ad)).join('')+'</optgroup>';
+    if(customs.length) h+='<optgroup label="Benim seslerim">'+customs.map(c=>opt('c:'+c.id,c.name)).join('')+'</optgroup>';
+    $('#'+id).innerHTML=h; });
   $('#bgNote').textContent = NB ? 'Uygulama arka plandayken süre bitince telefonun bildirim sesiyle haber verilir.' : 'Tarayıcı sürümünde sesler sayfa açıkken çalar.';
 }
 let view='timer';
@@ -538,6 +599,20 @@ $('#durCard').addEventListener('click',e=>{ const b=e.target.closest('button[dat
 $('#durCard').addEventListener('change',e=>{ const i=e.target; if(i.dataset.k) setNum(i.dataset.k, parseInt(i.value), i); });
 ['autoBreak','autoFocus','vibrate'].forEach(id=>$('#'+id).onchange=e=>{ st()[id]=e.target.checked; save(); });
 ['sndFocus','sndBreak'].forEach(id=>$('#'+id).onchange=e=>{ st()[id]=e.target.value; save(); playSound(e.target.value); });
+$('#addSnd').onclick=()=>$('#sndFile').click();
+$('#sndFile').onchange=async e=>{ const f=e.target.files&&e.target.files[0]; e.target.value=''; if(!f) return;
+  if(f.size>5*1024*1024){ toast('Dosya 5 MB\'tan büyük'); return; }
+  try{ const data=await f.arrayBuffer(); const id=Date.now().toString(36);
+    const name=(f.name||'Ses').replace(/\.[^.]+$/,'').slice(0,40)||'Ses';
+    await SDB.put({id,name,type:f.type||'audio/mpeg',data}); await loadCustoms(); renderSettings(); playSound('c:'+id); toast('Ses eklendi: '+name); }
+  catch(err){ toast('Ses eklenemedi'); } };
+$('#customList').addEventListener('click',e=>{ const p=e.target.closest('[data-cp]'), d=e.target.closest('[data-cd]');
+  if(p) playSound('c:'+p.dataset.cp);
+  if(d){ const id=d.dataset.cd, c=customs.find(x=>x.id===id);
+    confirmSheet('Ses silinsin mi?', esc(c?c.name:'')+' listeden kaldırılacak.','Sil', async()=>{ try{ await SDB.del(id); }catch(e){}
+      if(curls[id]){ URL.revokeObjectURL(curls[id]); delete curls[id]; }
+      ['sndFocus','sndBreak'].forEach(k=>{ if(st()[k]==='c:'+id) st()[k]='zil'; }); save(); await loadCustoms(); renderSettings(); toast('Silindi'); }); } });
+$('#colorRow').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; st().color=b.dataset.c; save(); applyTheme(); renderSettings(); });
 $('#themeSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; st().theme=b.dataset.th; save(); applyTheme(); renderSettings(); });
 $('#vol').oninput=e=>{ st().vol=+e.target.value; save(); };
 $('#vol').onchange=()=>playSound(st().sndFocus);
@@ -562,6 +637,7 @@ $('#wipeBtn').onclick=()=>confirmSheet('Tüm kayıtlar silinsin mi?','Takvimdeki
 let lastSave=0;
 function loop(){ const now=Date.now(); if(settle(now)) save(); if(now-lastSave>5000){ save(); lastSave=now; } if(!hidden) renderTimer(now); }
 applyTheme(); settle(Date.now()); renderAll(); save();
+loadCustoms().then(()=>{ if(view==='set') renderSettings(); });
 setInterval(loop,250);
 window.addEventListener('pagehide',()=>{ settle(Date.now()); save(); });
 })();
