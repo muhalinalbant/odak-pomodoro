@@ -12,6 +12,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.view.View;
+import android.view.Window;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -96,6 +98,24 @@ public class MainActivity extends Activity {
         public void cancel(int id) {
             AlarmManager am = getSystemService(AlarmManager.class);
             if (am != null) am.cancel(alarmIntent(id, null, null));
+        }
+
+        /** Uygulama içindeki tema seçimine göre durum/gezinme çubuğu renklerini ayarlar. */
+        @JavascriptInterface
+        @SuppressWarnings("deprecation")
+        public void setBars(boolean dark) {
+            runOnUiThread(() -> {
+                Window w = getWindow();
+                int bg = dark ? 0xFF141312 : 0xFFF6F3EE;
+                int nav = dark ? 0xFF1D1B19 : 0xFFFFFFFF;
+                w.setStatusBarColor(bg);
+                w.setNavigationBarColor(nav);
+                if (web != null) web.setBackgroundColor(bg);
+                View d = w.getDecorView();
+                int lightFlags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                int f = d.getSystemUiVisibility();
+                d.setSystemUiVisibility(dark ? (f & ~lightFlags) : (f | lightFlags));
+            });
         }
 
         @JavascriptInterface
