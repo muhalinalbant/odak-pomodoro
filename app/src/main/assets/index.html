@@ -6,8 +6,7 @@
 <title>Odak · Pomodoro</title>
 <script>try{var _t=(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).theme||'auto';
 if(_t==='dark'||_t==='black'||(_t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');
-if(_t==='black')document.documentElement.classList.add('black');
-var _c=({domates:['Domates','214,90,74','224,138,60','184,69,95'],okyanus:['Okyanus','61,124,201','47,159,179','90,95,196'],orman:['Orman','52,140,96','106,163,63','42,127,132'],lavanta:['Lavanta','138,99,201','176,101,184','95,106,200'],gul:['Gül','208,87,127','224,122,106','168,90,168'],amber:['Amber','196,132,36','201,162,39','184,97,58'],grafit:['Grafit','110,121,134','118,150,140','108,115,152'],turkuaz:['Turkuaz','18,150,150','80,170,120','40,110,170'],zeytin:['Zeytin','122,132,38','170,150,50','80,120,90'],kakao:['Kakao','139,94,66','190,130,80','110,90,110']})[(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).color];
+var _c=({domates:['Domates','214,90,74','224,138,60','184,69,95'],okyanus:['Okyanus','61,124,201','47,159,179','90,95,196'],orman:['Orman','52,140,96','106,163,63','42,127,132'],lavanta:['Lavanta','138,99,201','176,101,184','95,106,200'],amber:['Amber','196,132,36','201,162,39','184,97,58']})[(JSON.parse(localStorage.getItem('odak.v1')||'{}').settings||{}).color];
 if(_c){var _s=document.documentElement.style;_s.setProperty('--ac',_c[1]);_s.setProperty('--sh',_c[2]);_s.setProperty('--lg',_c[3]);}}catch(e){}</script>
 <style>
 :root{
@@ -17,8 +16,7 @@ if(_c){var _s=document.documentElement.style;_s.setProperty('--ac',_c[1]);_s.set
   --r:18px;
 }
 html{color-scheme:light}
-html.dark{color-scheme:dark;--bg:#141312;--card:#1d1b19;--text:#f1ede7;--muted:#9a938a;--line:#2c2926;--chip:#26231f;}
-html.dark.black{--bg:#000;--card:#0c0c0c;--text:#f2f2f2;--muted:#8c8c8c;--line:#1f1f1f;--chip:#171717;}
+html.dark{color-scheme:dark;--bg:#000;--card:#0c0c0c;--text:#f2f2f2;--muted:#8c8c8c;--line:#1f1f1f;--chip:#171717;}
 body[data-ph="short"]{--accent:var(--short);--accent-soft:rgba(var(--sh),.14)}
 body[data-ph="long"]{--accent:var(--long);--accent-soft:rgba(var(--lg),.14)}
 body[data-ph="sw"]{--accent:#7a6a58;--accent-soft:rgba(122,106,88,.14)}
@@ -56,8 +54,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .dots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
 .dots i.f{background:var(--accent)}
 .dots i.c{background:var(--accent);opacity:.4}
-.swTime{font-size:clamp(50px,16vw,64px);font-weight:300;text-align:center;font-variant-numeric:tabular-nums;margin:70px 0 10px;letter-spacing:-.02em}
-.swSub{text-align:center;color:var(--muted);font-size:14px;margin-bottom:62px}
+.swTime{font-size:clamp(50px,16vw,64px);font-weight:300;text-align:center;font-variant-numeric:tabular-nums;margin:56px 0 22px;letter-spacing:-.02em}
+.swAlert{margin:0 0 30px;text-align:center}
+.swAlertT{display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;color:var(--muted);margin-bottom:10px}
+.swAlertT svg{width:17px;height:17px}
+.swAlert.on .swAlertT{color:var(--accent);font-weight:600}
+.swQuick{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.swQuick button{padding:7px 12px;border-radius:99px;background:var(--chip);color:var(--muted);font-size:13.5px}
+.swQuick button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
 .topBar{display:flex;gap:8px;align-items:center}.topBar .seg{flex:1}
 .gear{width:40px;height:40px;border-radius:12px;background:var(--chip);color:var(--muted);display:grid;place-items:center;flex:none}
 .gear svg{width:21px;height:21px}
@@ -279,7 +283,8 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
 
   <div id="swBox" hidden>
     <div class="swTime" id="swTime">0:00:00</div>
-    <div class="swSub" id="swSub">Serbest çalışma · süre bugüne eklenir</div>
+    <div class="swAlert"><div class="swAlertT"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span id="swSub">Ötme kapalı</span></div>
+      <div class="swQuick" id="swQuick"></div></div>
   </div>
 
   <div class="label"><button id="labelBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span id="labelTxt">Oturum adı ekle</span></button></div>
@@ -362,7 +367,7 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
 <section class="view" id="v-set"><div class="wrap">
   <h2>Görünüm</h2>
   <div class="card"><div class="seg theme" id="themeSeg">
-    <button data-th="auto">Sistem</button><button data-th="light">Aydınlık</button><button data-th="dark">Karanlık</button><button data-th="black">Siyah</button>
+    <button data-th="auto">Sistem</button><button data-th="light">Aydınlık</button><button data-th="dark">Karanlık</button>
   </div></div>
 
   <div class="card" style="margin-top:10px"><div class="row" style="padding:4px 0"><div class="t">Tema rengi</div></div>
@@ -630,7 +635,12 @@ function renderTimer(now){
     document.title = (t.running? fmtClock(left)+' · ':'')+'Odak';
   }else{
     const e=swElapsed(now); $('#swTime').textContent=fmtSw(e);
-    const ev=st().swEvery||0; $('#swSub').textContent = ev ? 'Her '+ev+' dakikada bir uyarı verir' : 'Serbest çalışma · süre bugüne eklenir';
+    const ev=st().swEvery||0; $('#swSub').textContent = ev ? 'Her '+ev+' dakikada bir öter' : 'Ötme kapalı';
+    $('.swAlert').classList.toggle('on',!!ev);
+    const QS=[0,15,25,30,45,60], key=QS.join()+'|'+ev;
+    if($('#swQuick').dataset.k!==key){ $('#swQuick').dataset.k=key;
+      $('#swQuick').innerHTML=QS.map(m=>'<button data-sw="'+m+'" class="'+(ev===m?'on':'')+'">'+(m?m+' dk':'Kapalı')+'</button>').join('')+
+        '<button data-sw="x" class="'+(ev&&!QS.includes(ev)?'on':'')+'">'+(ev&&!QS.includes(ev)?ev+' dk':'Diğer…')+'</button>'; }
     $('#startBtn').textContent = t.swRun? 'Duraklat' : (t.swAcc>0? 'Devam':'Başlat');
     document.title = (t.swRun? fmtSw(e)+' · ':'')+'Odak';
   }
@@ -751,13 +761,14 @@ function renderCustoms(){
     '<button class="del" data-cd="'+c.id+'" aria-label="Sil">×</button></div>').join('') : '';
 }
 const MQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
-const COLORS={domates:['Domates','214,90,74','224,138,60','184,69,95'],okyanus:['Okyanus','61,124,201','47,159,179','90,95,196'],orman:['Orman','52,140,96','106,163,63','42,127,132'],lavanta:['Lavanta','138,99,201','176,101,184','95,106,200'],gul:['Gül','208,87,127','224,122,106','168,90,168'],amber:['Amber','196,132,36','201,162,39','184,97,58'],grafit:['Grafit','110,121,134','118,150,140','108,115,152'],turkuaz:['Turkuaz','18,150,150','80,170,120','40,110,170'],zeytin:['Zeytin','122,132,38','170,150,50','80,120,90'],kakao:['Kakao','139,94,66','190,130,80','110,90,110']};
+const COLORS={domates:['Domates','214,90,74','224,138,60','184,69,95'],okyanus:['Okyanus','61,124,201','47,159,179','90,95,196'],orman:['Orman','52,140,96','106,163,63','42,127,132'],lavanta:['Lavanta','138,99,201','176,101,184','95,106,200'],amber:['Amber','196,132,36','201,162,39','184,97,58']};
 function applyTheme(){
   const P=COLORS[st().color]||COLORS.domates, R=document.documentElement.style;
   R.setProperty('--ac',P[1]); R.setProperty('--sh',P[2]); R.setProperty('--lg',P[3]);
-  const th=st().theme, dark= th==='dark' || th==='black' || (th==='auto' && MQ && MQ.matches), black=th==='black';
-  document.documentElement.classList.toggle('dark',!!dark); document.documentElement.classList.toggle('black',black);
-  try{ if(NB&&NB.setBarsEx) NB.setBarsEx(black?'#000000':dark?'#141312':'#F6F3EE', black?'#0C0C0C':dark?'#1D1B19':'#FFFFFF', !!dark);
+  if(st().theme==='black') st().theme='dark';
+  const th=st().theme, dark= th==='dark' || (th==='auto' && MQ && MQ.matches);
+  document.documentElement.classList.toggle('dark',!!dark);
+  try{ if(NB&&NB.setBarsEx) NB.setBarsEx(dark?'#000000':'#F6F3EE', dark?'#0C0C0C':'#FFFFFF', !!dark);
        else if(NB&&NB.setBars) NB.setBars(!!dark); }catch(e){}
 }
 if(MQ){ const f=()=>{ if(st().theme==='auto') applyTheme(); }; MQ.addEventListener? MQ.addEventListener('change',f) : MQ.addListener(f); }
@@ -900,6 +911,8 @@ $('#gearBtn').onclick=()=>{ const pomo=T().mode==='pomo'; $('#tsetPomo').hidden=
   if(pomo) renderDurations(); else swOptsRender(); $('#tset').classList.add('on'); };
 $('#tsetOk').onclick=()=>$('#tset').classList.remove('on');
 $('#tset').addEventListener('click',e=>{ if(e.target.id==='tset') $('#tset').classList.remove('on'); });
+$('#swQuick').addEventListener('click',e=>{ const b=e.target.closest('[data-sw]'); if(!b) return;
+  if(b.dataset.sw==='x'){ $('#gearBtn').click(); setTimeout(()=>$('#swEveryIn').focus(),200); } else setSwEvery(+b.dataset.sw); });
 $('#swOpts').addEventListener('click',e=>{ const b=e.target.closest('[data-sw]'); if(b) setSwEvery(+b.dataset.sw); });
 $('#tsetSw').addEventListener('click',e=>{ const b=e.target.closest('[data-swd]'); if(b) setSwEvery((st().swEvery||0)+ +b.dataset.swd); });
 $('#swEveryIn').onchange=e=>setSwEvery(parseInt(e.target.value));
