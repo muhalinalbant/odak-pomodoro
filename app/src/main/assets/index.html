@@ -46,8 +46,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .ring circle{fill:none;stroke-width:6}
 .ring .bgc{stroke:var(--line)}
+.ring.over .fg{stroke-dashoffset:0!important;opacity:1!important;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
+.ring.over .time{color:var(--accent);font-size:clamp(44px,14vw,56px)}
 .ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .3s linear,stroke .3s}
-.ringTxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ringTxt{cursor:pointer;-webkit-user-select:none;user-select:none;position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .time{font-size:clamp(52px,17vw,68px);font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .sub{color:var(--muted);font-size:14px;margin-top:2px}
 .dots{display:flex;justify-content:center;gap:7px;height:10px;margin:4px 0 16px}
@@ -64,7 +67,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .gear svg{width:21px;height:21px}
 #tset .row+.row,#durCard .row+.row{border-top:1px solid var(--line)}
 #tset .sheetBox{max-height:88vh;overflow:auto}
-#pomoBox{touch-action:pan-y}
+#pomoBox,#v-timer{touch-action:pan-y}
+#v-timer{min-height:calc(100vh - 80px)}
 .swipeL{animation:swl .22s}.swipeR{animation:swr .22s}
 @keyframes swl{from{transform:translateX(26px);opacity:.3}to{transform:none;opacity:1}}
 @keyframes swr{from{transform:translateX(-26px);opacity:.3}to{transform:none;opacity:1}}
@@ -410,6 +414,8 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
   <div id="tsetPomo">
     <h3>Odak ayarları</h3>
     <div id="durCard"></div>
+    <div class="row"><div class="t">Süre bitince saymaya devam et<small>"Odağı bitir"e basana kadar ek süre sayılır ve kaydedilir</small></div>
+      <label class="sw"><input type="checkbox" id="overT"><i></i></label></div>
     <div class="row"><div class="t">Molaları otomatik başlat<small>Odak bitince mola kendiliğinden başlar</small></div>
       <label class="sw"><input type="checkbox" id="autoBreak"><i></i></label></div>
     <div class="row"><div class="t">Odağı otomatik başlat<small>Mola bitince yeni odak kendiliğinden başlar</small></div>
@@ -432,7 +438,7 @@ textarea{width:100%;height:150px;border-radius:12px;border:1px solid var(--line)
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const NB = window.Android || null;          // Android köprüsü (APK içinde)
 const KEY='odak.v1';
-const DEF={focus:25,short:5,long:15,every:4,autoBreak:true,autoFocus:false,sndFocus:'zil',sndBreak:'yumusak',vol:0.7,vibrate:true,theme:'auto',color:'domates',swEvery:0,longBreaks:false};
+const DEF={focus:25,short:5,long:15,every:4,autoBreak:true,autoFocus:false,sndFocus:'zil',sndBreak:'yumusak',vol:0.7,vibrate:true,theme:'auto',color:'domates',swEvery:0,longBreaks:false,overtime:true};
 const PH={focus:'Odak',short:'Kısa mola',long:'Uzun mola'};
 const phName=p=> p==='short'&&!st().longBreaks ? 'Mola' : PH[p];
 const phases=()=> st().longBreaks ? ['focus','short','long'] : ['focus','short'];
@@ -573,7 +579,7 @@ const autoFor=p=> p==='focus'? st().autoFocus : st().autoBreak;
 function pomoLeft(now){ const t=T(); return t.running? t.endAt-now : (t.remaining ?? durMs(t.phase)); }
 
 function advance(at,live){ // mevcut faz bitti → sonrakine geç
-  const t=T(), prev=t.phase; const [np,nc]=nextOf(prev,t.count); t.phase=np; t.count=nc;
+  const t=T(), prev=t.phase; t.over=false; const [np,nc]=nextOf(prev,t.count); t.phase=np; t.count=nc;
   if(live){
     playSound(prev==='focus'?st().sndFocus:st().sndBreak); buzz();
     toast(prev==='focus' ? (np==='long'?'Odak bitti · uzun mola zamanı':'Odak bitti · mola zamanı') : 'Mola bitti · odaklanma zamanı');
@@ -585,7 +591,11 @@ function settle(now){ // geçen süreyi kaydet, biten fazları işle (arka pland
   const t=T(); let changed=false;
   if(t.mode==='pomo' && t.running){
     let guard=0;
-    while(t.running && now>=t.endAt && guard++<500){
+    while(t.running && now>=t.endAt && !(t.phase==='focus'&&t.over) && guard++<500){
+      if(t.phase==='focus' && st().overtime){ // süre doldu: "Odağı bitir"e basılana kadar saymaya devam
+        t.over=true; changed=true;
+        if(now-t.endAt<3000 && !(hidden&&NB)){ playSound(st().sndFocus); buzz(); toast('Odak süresi doldu · ek süre sayılıyor'); }
+        break; }
       if(t.phase==='focus'){ credit(t.last,t.endAt); closeRun(); }
       t.last=t.endAt; advance(t.endAt, now-t.endAt<3000 && !(hidden&&NB)); changed=true;
     }
@@ -611,6 +621,7 @@ function scheduleAlarms(){
   let p=t.phase,c=t.count,end=t.endAt;
   for(let i=0;i<MAXA;i++){
     const [np,nc]=nextOf(p,c), auto=autoFor(np);
+    if(p==='focus' && st().overtime){ if(!t.over) try{ NB.schedule(i,end,'Odak süresi doldu','Ek süre sayılıyor · bitirmek için uygulamayı aç','focus',st().vol); }catch(e){} break; }
     const title = p==='focus' ? 'Odak tamamlandı 🍅' : 'Mola bitti';
     const text = (p==='focus' ? phName(np)+' · '+st()[np]+' dk' : 'Odaklanma zamanı · '+st().focus+' dk') + (auto?' (otomatik başladı)':'');
     try{ NB.schedule(i,end,title,text, p==='focus'?'focus':'break', st().vol); }catch(e){}
@@ -634,14 +645,15 @@ function renderTimer(now){
     if(!st().longBreaks && t.phase==='long'){ t.phase='short'; }
     $$('#phaseChips button').forEach(b=>{ b.classList.toggle('on',b.dataset.phase===t.phase); b.hidden = b.dataset.phase==='long' && !st().longBreaks;
       if(b.dataset.phase==='short') b.textContent=phName('short'); });
-    const left=pomoLeft(now), tot=durMs(t.phase);
-    $('#time').textContent=fmtClock(left);
+    const left=pomoLeft(now), tot=durMs(t.phase), ov=t.phase==='focus'&&t.over;
+    $('#time').textContent= ov ? (()=>{ const x=Math.floor(-left/1000); return '+'+pad(Math.floor(x/60))+':'+pad(x%60); })() : fmtClock(left);
+    $('.ring').classList.toggle('over',!!ov);
     const r=Math.min(1,Math.max(0,left/tot)); $('#ringFg').style.strokeDashoffset = C*(1-r); $('#ringFg').style.opacity = r<0.003?0:1;
     const n=st().every, done=t.count%n;
     const LB=st().longBreaks;
-    $('#sub').textContent = t.phase==='focus' && LB ? PH.focus+' · '+(done+1)+'/'+n : phName(t.phase);
+    $('#sub').textContent = ov ? 'Ek süre · toplam '+fmtDur((tot-left)/1000) : t.phase==='focus' && LB ? PH.focus+' · '+(done+1)+'/'+n : phName(t.phase);
     let h=''; if(LB) for(let i=0;i<n;i++) h+='<i class="'+(i<done?'f':(i===done&&t.phase==='focus'?'c':''))+'"></i>'; $('#dots').innerHTML=h;
-    $('#startBtn').textContent = t.running? 'Duraklat' : (t.remaining!=null? 'Devam' : 'Başlat');
+    $('#startBtn').textContent = ov&&t.running ? 'Odağı bitir' : t.running? 'Duraklat' : (t.remaining!=null? 'Devam' : 'Başlat');
     document.title = (t.running? fmtClock(left)+' · ':'')+'Odak';
   }else{
     const e=swElapsed(now); $('#swTime').textContent=fmtSw(e);
@@ -801,7 +813,7 @@ function renderDurations(){ const s=st();
     '<div class="row"><div class="t">'+(k!=='every'?'<i class="pdot" style="background:var(--'+k+')"></i>':'')+l+(k==='every'?'<small>Kaç odaktan sonra uzun mola verilsin</small>':'')+'</div><div class="step">'+
     '<button data-k="'+k+'" data-d="-1">−</button><input inputmode="numeric" data-k="'+k+'" data-min="'+mn+'" data-max="'+mx+'" value="'+s[k]+'">'+
     '<button data-k="'+k+'" data-d="1">+</button><span>'+u+'</span></div></div>').join('');
-  $('#autoBreak').checked=s.autoBreak; $('#autoFocus').checked=s.autoFocus;
+  $('#autoBreak').checked=s.autoBreak; $('#autoFocus').checked=s.autoFocus; $('#overT').checked=s.overtime;
 }
 function renderSettingsRest(){ const s=st();
   $('#vibrate').checked=s.vibrate; $('#vol').value=s.vol;
@@ -916,14 +928,32 @@ $('#nav').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!
 $('#modeSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const t=T(); if(t.mode===b.dataset.mode) return;
   if(t.mode==='pomo') pausePomo(); else pauseSw(); t.mode=b.dataset.mode; save(); renderAll(); });
 $('#phaseChips').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const t=T();
-  settle(Date.now()); closeRun(); t.running=false; t.phase=b.dataset.phase; t.remaining=null; save(); renderAll(); });
+  settle(Date.now()); closeRun(); t.running=false; t.over=false; t.phase=b.dataset.phase; t.remaining=null; save(); renderAll(); });
 $('#startBtn').onclick=()=>{ const t=T();
-  if(t.mode==='pomo'){ t.running? pausePomo(): startPomo(); } else { t.swRun? pauseSw(): startSw(); } save(); renderAll(); };
+  if(t.mode==='pomo'){ if(t.running&&t.over){ const now=Date.now(); settle(now); const tot=durMs('focus')+(now-t.endAt); closeRun(); t.last=now; advance(now,false); toast('Odak bitti · '+fmtDur(tot/1000)); }
+    else t.running? pausePomo(): startPomo(); } else { t.swRun? pauseSw(): startSw(); } save(); renderAll(); };
 $('#resetBtn').onclick=()=>{ const t=T(), now=Date.now(); settle(now);
-  if(t.mode==='pomo'){ t.running=false; t.remaining=null; } else { closeRun(); t.swAcc=0; t.swN=0; if(t.swRun){ t.swStart=now; t.last=now; } }
+  if(t.mode==='pomo'){ t.running=false; t.remaining=null; t.over=false; } else { closeRun(); t.swAcc=0; t.swN=0; if(t.swRun){ t.swStart=now; t.last=now; } }
   save(); renderAll(); };
 $('#skipBtn').onclick=()=>{ const t=T(), now=Date.now(); settle(now);
   advance(now,false); save(); renderAll(); };
+function editPhaseDur(){ const t=T(); if(t.mode!=='pomo') return; const k=t.phase, cur=st()[k], mx=k==='focus'?180:k==='long'?90:60;
+  const Q = k==='focus' ? [15,20,25,30,45,50,60,90] : [3,5,10,15,20,30];
+  openSheet('<h3>'+phName(k)+' süresi</h3><p>'+(t.running?'Çalışan sayaca da hemen uygulanır.':'Bundan sonraki '+phName(k).toLowerCase()+' oturumları bu süreyle başlar.')+'</p>'+
+    '<div class="hm"><label><input id="pdIn" inputmode="numeric" value="'+cur+'">dakika</label></div>'+
+    '<div class="quick" style="flex-wrap:wrap">'+Q.map(m=>'<button data-m="'+m+'">'+m+' dk</button>').join('')+'</div>'+
+    '<div class="acts"><button data-x>Vazgeç</button><button class="ok" data-ok>Kaydet</button></div>', b=>{
+    const I=b.querySelector('#pdIn'); b.querySelectorAll('[data-m]').forEach(x=>x.onclick=()=>{ I.value=x.dataset.m; });
+    b.querySelector('[data-x]').onclick=closeSheet;
+    b.querySelector('[data-ok]').onclick=()=>{ const v=Math.max(1,Math.min(mx,parseInt(I.value)||cur)), d=(v-cur)*60000; st()[k]=v;
+      if(t.running){ t.endAt+=d; if(t.over && Date.now()<t.endAt) t.over=false; }
+      else if(t.remaining!=null){ t.remaining+=d; }
+      save(); closeSheet(); renderAll(); toast(phName(k)+' süresi '+v+' dk'); };
+    setTimeout(()=>{ I.focus(); I.select(); },150); }); }
+(()=>{ const el=$('.ringTxt'); let last=0;
+  el.addEventListener('dblclick',e=>{ e.preventDefault(); if(Date.now()-last>400){ last=Date.now(); editPhaseDur(); } });
+  let tLast=0; el.addEventListener('touchend',e=>{ const n=Date.now(); if(n-tLast<320){ e.preventDefault(); if(n-last>400){ last=n; editPhaseDur(); } tLast=0; } else tLast=n; });
+})();
 function swOptsRender(){ const v=st().swEvery||0;
   $('#swOpts').innerHTML=[0,10,15,20,25,30,45,60].map(m=>'<button data-sw="'+m+'" class="'+(v===m?'on':'')+'">'+(m?'Her '+m+' dk':'Kapalı')+'</button>').join('');
   $('#swEveryIn').value=v||''; $('#swEveryIn').placeholder='–'; }
@@ -937,12 +967,13 @@ $('#tsetSw').addEventListener('click',e=>{ const b=e.target.closest('[data-swd]'
 $('#swEveryIn').onchange=e=>setSwEvery(parseInt(e.target.value));
 /* odak ↔ kısa mola ↔ uzun mola arasında kaydırma */
 (()=>{ let x0=null,y0=0;
-  const box=$('#pomoBox');
-  box.addEventListener('touchstart',e=>{ const t=e.touches[0]; x0=t.clientX; y0=t.clientY; },{passive:true});
-  box.addEventListener('touchend',e=>{ if(x0==null) return; const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
+  const box=$('#pomoBox'), area=$('#v-timer');
+  area.addEventListener('touchstart',e=>{ x0=null; if(T().mode!=='pomo'||$('#sheet').classList.contains('on')||$('#tset').classList.contains('on')) return;
+    if(e.target.closest('input,select,textarea')) return; const t=e.touches[0]; x0=t.clientX; y0=t.clientY; },{passive:true});
+  area.addEventListener('touchend',e=>{ if(x0==null) return; const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
     if(Math.abs(dx)<50||Math.abs(dy)>Math.abs(dx)*0.7) return;
     const tt=T(), PHS=phases(); let i=PHS.indexOf(tt.phase)+(dx<0?1:-1); if(i<0||i>=PHS.length) return;
-    settle(Date.now()); closeRun(); tt.running=false; tt.phase=PHS[i]; tt.remaining=null; save(); renderAll();
+    settle(Date.now()); closeRun(); tt.running=false; tt.over=false; tt.phase=PHS[i]; tt.remaining=null; save(); renderAll();
     const ring=box.querySelector('.ring'); ring.classList.remove('swipeL','swipeR'); void ring.offsetWidth; ring.classList.add(dx<0?'swipeL':'swipeR'); });
 })();
 $('#calSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; calView=b.dataset.cv; renderCal(); window.scrollTo(0,0); });
@@ -978,6 +1009,7 @@ $('#durCard').addEventListener('change',e=>{ const i=e.target;
     save(); renderDurations(); renderTimer(Date.now()); return; }
   if(i.dataset.k) setNum(i.dataset.k, parseInt(i.value), i); });
 ['autoBreak','autoFocus','vibrate'].forEach(id=>$('#'+id).onchange=e=>{ st()[id]=e.target.checked; save(); });
+$('#overT').onchange=e=>{ st().overtime=e.target.checked; const t=T(); if(!e.target.checked&&t.over){ settle(Date.now()); } save(); renderTimer(Date.now()); };
 ['sndFocus','sndBreak'].forEach(id=>$('#'+id).onchange=e=>{ st()[id]=e.target.value; save(); playSound(e.target.value); exportAll(); });
 $('#addSnd').onclick=()=>$('#sndFile').click();
 $('#sndFile').onchange=async e=>{ const f=e.target.files&&e.target.files[0]; e.target.value=''; if(!f) return;
