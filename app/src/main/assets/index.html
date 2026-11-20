@@ -113,7 +113,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .wkStats .val{font-weight:600;font-variant-numeric:tabular-nums;margin-top:2px}
 .topic{display:flex;align-items:center;gap:10px;padding:9px 0}
 .topic+.topic{border-top:1px solid var(--line)}
-.topic .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topic .n{flex:1.3;min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.25;word-break:break-word}
 .topic .tb{flex:1.2;height:6px;border-radius:3px;background:var(--chip);overflow:hidden}
 .topic .tb i{display:block;height:100%;background:var(--focus);border-radius:3px}
 .topic .d{font-weight:600;font-variant-numeric:tabular-nums;font-size:14px;min-width:70px;text-align:right}
@@ -146,6 +146,17 @@ h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .ses .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ses .d{font-weight:600;font-variant-numeric:tabular-nums}
 .sheetBox h4{margin:14px 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lblList{display:flex;flex-direction:column;gap:6px;max-height:34vh;overflow:auto;margin-bottom:6px}
+.lblItem{display:flex;align-items:center;background:var(--chip);border-radius:12px}
+.lblItem.on{box-shadow:inset 0 0 0 1.5px var(--focus)}
+.lblItem .pick{flex:1;text-align:left;padding:11px 14px;font-size:15px}
+.lblItem.on .pick{font-weight:600}
+.lblItem .rm{width:40px;height:40px;color:var(--muted);font-size:20px}
+.anChips{display:flex;gap:6px;overflow-x:auto;margin:-2px -2px 14px;padding:2px;scrollbar-width:none}
+.anChips::-webkit-scrollbar{display:none}
+.anChips button{flex:none;padding:6px 12px;border-radius:99px;background:var(--chip);color:var(--muted);font-size:13px;white-space:nowrap}
+.anChips button.on{background:var(--accent-soft);color:var(--focus);font-weight:600;box-shadow:inset 0 0 0 1px var(--focus)}
+.topic[data-lb]{cursor:pointer}
 .dayTopics{margin:-4px 0 14px;font-size:13.5px}
 .weekTot{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:10px;margin-bottom:6px;border-bottom:1px solid var(--line);color:var(--muted);font-size:14px}
 .weekTot b{color:var(--text);font-size:20px}
@@ -436,7 +447,7 @@ let S=load()||{};
 function normalize(){
   S.settings=Object.assign({},DEF,S.settings||{});
   S.log=S.log||{};
-  S.tags=S.tags||{}; S.ses=Array.isArray(S.ses)?S.ses:[];
+  S.tags=S.tags||{}; S.ses=Array.isArray(S.ses)?S.ses:[]; S.labels=Array.isArray(S.labels)?S.labels:null;
   S.t=Object.assign({mode:'pomo',phase:'focus',running:false,endAt:0,remaining:null,count:0,last:0,swRun:false,swAcc:0,swStart:0},S.t||{});
 }
 normalize();
@@ -460,8 +471,11 @@ function dayTopics(key){ // {ad: sn} + adsız kalan kısım
   const tot=S.log[key]||0, t=Object.assign({},S.tags[key]||{}); let sum=0; for(const v of Object.values(t)) sum+=v;
   if(sum>tot){ const f=tot/sum; for(const k in t) t[k]*=f; sum=tot; }
   if(tot-sum>=60) t['']=tot-sum; return t; }
-function recentLabels(){ const seen={}; Object.keys(S.tags).sort().reverse().slice(0,60).forEach(k=>{ for(const n in S.tags[k]) if(!(n in seen)) seen[n]=k; });
-  return Object.keys(seen).slice(0,10); }
+function recentLabels(){
+  if(!S.labels){ const seen={}; Object.keys(S.tags).sort().reverse().forEach(k=>{ for(const n in S.tags[k]) if(n&&!(n in seen)) seen[n]=1; });
+    const cur=(T().label||'').trim(); S.labels=Object.keys(seen); if(cur&&!S.labels.includes(cur)) S.labels.unshift(cur); }
+  return S.labels; }
+function rememberLabel(v){ v=(v||'').trim(); if(!v) return; const L=recentLabels(), i=L.indexOf(v); if(i>=0) L.splice(i,1); L.unshift(v); if(L.length>40) L.length=40; save(); }
 /* tek tek oturum kaydı: kesintisiz çalışma = 1 oturum */
 function runAdd(a,b){ const t=T(), L=(t.label||'').trim();
   if(t.run && (Math.abs(a-t.run.e)>5000 || t.run.l!==L)) closeRun();
@@ -704,19 +718,28 @@ function renderWeek(){
   // oturumlara göre
   const agg={}; vals.forEach(([d])=>{ const t=dayTopics(dkey(d)); for(const n in t) agg[n]=(agg[n]||0)+t[n]; });
   $('#wTopics').innerHTML = topicsHtml(agg,'Zamanlayıcı ekranında oturuma ad verirsen, haftalık süreler burada konulara göre ayrılır.');
-  const wend=new Date(ws); wend.setDate(ws.getDate()+7); $('#wAn').innerHTML=analysisHtml(ws.getTime(),wend.getTime());
+  const wend=new Date(ws); wend.setDate(ws.getDate()+7); $('#wAn').innerHTML=analysisHtml(ws.getTime(),wend.getTime(),null,agg);
 }
 const DILIM=[['Sabah','05–12'],['Öğle','12–17'],['Akşam','17–22'],['Gece','22–05']];
 const dilimOf=ts=>{ const h=new Date(ts).getHours(); return h>=5&&h<12?0:h>=12&&h<17?1:h>=17&&h<22?2:3; };
 function topicsHtml(agg,emptyMsg){
   const rows=Object.entries(agg).filter(r=>r[1]>=60).sort((a,b)=>b[1]-a[1]); const tot=rows.reduce((a,r)=>a+r[1],0)||1;
   if(!rows.length) return '<div class="topic" style="opacity:.55"><div class="n">Kayıt yok</div><div class="tb"><i style="width:0"></i></div><div class="d">0 dk</div></div>'+(emptyMsg?'<div class="note" style="margin:6px 0 0">'+emptyMsg+'</div>':'');
-  return rows.map(([n,v])=>'<div class="topic"><div class="n">'+(n?esc(n):'<span style="color:var(--muted)">Adsız</span>')+'</div><div class="tb"><i style="width:'+(v/rows[0][1]*100)+'%"></i></div><div class="d">'+fmtDur(v)+'<small>%'+Math.round(v/tot*100)+'</small></div></div>').join(''); }
-function analysisHtml(fromTs,toTs,top){
-  const ss=sessionsIn(fromTs,toTs).filter(x=>x.m!=='man'), n=ss.length;
+  return rows.map(([n,v])=>'<div class="topic" data-lb="'+esc(n)+'"><div class="n">'+(n?esc(n):'<span style="color:var(--muted)">Adsız</span>')+'</div><div class="tb"><i style="width:'+(v/rows[0][1]*100)+'%"></i></div><div class="d">'+fmtDur(v)+'<small>%'+Math.round(v/tot*100)+'</small></div></div>').join(''); }
+let anFilter=null; // null = tümü, '' = adsız, 'X' = oturum
+function labelDays(fromTs,toTs,lb){ let c=0; const d=new Date(fromTs); while(d.getTime()<toTs){ const v=(dayTopics(dkey(d))[lb]||0); if(v>=60) c++; d.setDate(d.getDate()+1); } return c; }
+function analysisHtml(fromTs,toTs,top,agg){
+  agg=agg||{}; const names=Object.keys(agg).filter(n=>agg[n]>=60).sort((a,b)=>agg[b]-agg[a]);
+  if(anFilter!==null && !names.includes(anFilter)) anFilter=null;
+  const F=anFilter;
+  const chips = names.length>1 || (names.length===1&&names[0]) ? '<div class="anChips"><button data-af="__all" class="'+(F===null?'on':'')+'">Tümü</button>'+
+    names.map(n=>'<button data-af="'+esc(n)+'" class="'+(F===n?'on':'')+'">'+(n?esc(n):'Adsız')+'</button>').join('')+'</div>' : '';
+  if(F!==null){ const tot=Object.values(agg).reduce((a,b)=>a+b,0)||1, v=agg[F]||0, nd=labelDays(fromTs,toTs,F);
+    top=[[(F?esc(F):'Adsız')+' toplamı',fmtDur(v)],['Toplamdaki payı','%'+Math.round(v/tot*100)],['Çalışılan gün',nd+' gün',!nd],['Günlük ortalama',nd?fmtDur(v/nd):'–',!nd]]; }
+  const ss=sessionsIn(fromTs,toTs).filter(x=>x.m!=='man'&&(F===null||x.l===F)), n=ss.length;
   const sum=ss.reduce((a,x)=>a+x.sec,0), longest=n?ss.reduce((a,x)=>x.sec>a.sec?x:a):null;
   const dil=[0,0,0,0]; ss.forEach(x=>dil[dilimOf(x.s)]+=x.sec); const mxD=Math.max(...dil)||1, bestD=n?dil.indexOf(Math.max(...dil)):-1;
-  return (top?'<div class="anGrid anTop">'+top.map(([l,v,e])=>'<div'+(e?' class="mutedV"':'')+'><div class="lbl">'+l+'</div><div class="val">'+v+'</div></div>').join('')+'</div>':'')+
+  return chips+(top?'<div class="anGrid anTop">'+top.map(([l,v,e])=>'<div'+(e?' class="mutedV"':'')+'><div class="lbl">'+l+'</div><div class="val">'+v+'</div></div>').join('')+'</div>':'')+
     '<div class="anGrid'+(n?'':' empty')+'">'+
     '<div><div class="lbl">Oturum</div><div class="val">'+n+'</div></div>'+
     '<div><div class="lbl">Ortalama oturum</div><div class="val">'+(n?fmtDur(sum/n):'–')+'</div></div>'+
@@ -745,7 +768,7 @@ function renderMonth(){
   $('#mTopics').innerHTML=topicsHtml(magg,'Bu ay adlandırılmış oturum yok.');
   $('#mAn').innerHTML=analysisHtml(first.getTime(), new Date(viewY,viewM+1,1).getTime(),
     [[AYLAR[viewM]+' toplamı', mt>=60?fmtDur(mt):'0 dk', mt<60], ['Günlük ortalama', cnt?fmtDur(mt/cnt):'–', !cnt],
-     ['Çalışılan gün', cnt+' gün', !cnt], ['Ayın en uzun günü', best?best[0]+' '+AYLAR[viewM]:'–', !best]]);
+     ['Çalışılan gün', cnt+' gün', !cnt], ['Ayın en uzun günü', best?best[0]+' '+AYLAR[viewM]:'–', !best]], magg);
 }
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function renderCustoms(){
@@ -814,12 +837,16 @@ function sesRowsHtml(k){
 function tagMove(k,from,to,sec){ if(from){ const d=S.tags[k]; if(d&&d[from]!=null){ d[from]-=sec; if(d[from]<1) delete d[from]; } }
   if(to){ const d=S.tags[k]||(S.tags[k]={}); d[to]=(d[to]||0)+sec; } }
 function pickLabel(title,cur,cb){ const rec=recentLabels();
-  openSheet('<h3>'+title+'</h3><p>Süreler bu adla kaydedilir.</p>'+
-    '<input class="lblIn" id="lblIn" maxlength="40" placeholder="Örn. Sağlık psikolojisi" value="'+esc(cur||'')+'">'+
-    (rec.length?'<div class="recent">'+rec.map(n=>'<button data-n="'+esc(n)+'" class="'+(n===cur?'on':'')+'">'+esc(n)+'</button>').join('')+'</div>':'')+
-    '<div class="acts"><button data-clr>Adsız</button><button class="ok" data-ok>Tamam</button></div>', b=>{
-    const inp=b.querySelector('#lblIn'), done=v=>{ closeSheet(); cb((v||'').trim().slice(0,40)); };
-    b.querySelectorAll('[data-n]').forEach(x=>x.onclick=()=>done(x.dataset.n));
+  const list=()=>rec.length?'<div class="lblList">'+rec.map(n=>'<div class="lblItem'+(n===cur?' on':'')+'"><button class="pick" data-n="'+esc(n)+'">'+esc(n)+'</button><button class="rm" data-rm="'+esc(n)+'" aria-label="Listeden kaldır">×</button></div>').join('')+'</div>'
+                              :'<p style="margin:0 0 12px">Kayıtlı oturum yok. Yeni bir ad yazıp kaydet.</p>';
+  openSheet('<h3>'+title+'</h3><p>Seçtiğin ad, değiştirene kadar tüm odak ve kronometre süreleriyle kaydedilir.</p>'+
+    '<h4>Kayıtlı oturumlar</h4><div id="lblBox">'+list()+'</div>'+
+    '<h4>Yeni oturum</h4><input class="lblIn" id="lblIn" maxlength="40" placeholder="Örn. Sağlık psikolojisi" value="'+(cur&&!rec.includes(cur)?esc(cur):'')+'">'+
+    '<div class="acts"><button data-clr>Adsız</button><button class="ok" data-ok>Kaydet ve seç</button></div>', b=>{
+    const inp=b.querySelector('#lblIn'), done=v=>{ v=(v||'').trim().slice(0,40); rememberLabel(v); closeSheet(); cb(v); };
+    b.querySelector('#lblBox').addEventListener('click',e=>{ const pk=e.target.closest('[data-n]'), rm=e.target.closest('[data-rm]');
+      if(pk) done(pk.dataset.n);
+      if(rm){ const i=rec.indexOf(rm.dataset.rm); if(i>=0) rec.splice(i,1); save(); b.querySelector('#lblBox').innerHTML=list(); toast('Listeden kaldırıldı · geçmiş kayıtlar duruyor'); } });
     b.querySelector('[data-clr]').onclick=()=>done('');
     b.querySelector('[data-ok]').onclick=()=>done(inp.value);
     inp.addEventListener('keydown',e=>{ if(e.key==='Enter') done(inp.value); });
@@ -926,6 +953,11 @@ $('#calSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); i
     const i=V.indexOf(calView)+(dx<0?1:-1); if(i<0||i>2) return; calView=V[i]; renderCal();
     const box=$('#'+calView+'View'); box.classList.remove('swipeL','swipeR'); void box.offsetWidth; box.classList.add(dx<0?'swipeL':'swipeR'); window.scrollTo(0,0); });
 })();
+['#wAn','#mAn'].forEach(id=>$(id).addEventListener('click',e=>{ const b=e.target.closest('[data-af]'); if(!b) return;
+  anFilter = b.dataset.af==='__all' ? null : b.dataset.af; renderCal(); }));
+['#wTopics','#mTopics'].forEach(id=>$(id).addEventListener('click',e=>{ const r=e.target.closest('[data-lb]'); if(!r) return;
+  anFilter = anFilter===r.dataset.lb ? null : r.dataset.lb; renderCal();
+  const an=$(id==='#wTopics'?'#wAn':'#mAn'); an.scrollIntoView({behavior:'smooth',block:'start'}); }));
 $('#prevD').onclick=()=>{ dayOff--; renderDay(); };
 $('#nextD').onclick=()=>{ if(dayOff<0){ dayOff++; renderDay(); } };
 $('#dSes').addEventListener('click',e=>onSesClick(e,renderDay));
@@ -934,7 +966,7 @@ $('#prevW').onclick=()=>{ weekOff--; renderWeek(); };
 $('#nextW').onclick=()=>{ if(weekOff<0){ weekOff++; renderWeek(); } };
 $('#bars').addEventListener('click',e=>{ const b=e.target.closest('.bar'); if(b) dayDetail(b.dataset.k); });
 function renderLabel(){ const L=(T().label||'').trim(); $('#labelTxt').textContent=L||'Oturum adı ekle'; $('#labelBtn').classList.toggle('has',!!L); }
-$('#labelBtn').onclick=()=>pickLabel('Oturum adı',(T().label||'').trim(),v=>{ settle(Date.now()); closeRun(); T().label=v; save(); renderLabel(); });
+$('#labelBtn').onclick=()=>pickLabel('Oturum',(T().label||'').trim(),v=>{ settle(Date.now()); closeRun(); T().label=v; save(); renderLabel(); });
 $('#grid').addEventListener('click',e=>{ const b=e.target.closest('.day'); if(b) dayDetail(b.dataset.k); });
 $('#prevM').onclick=()=>{ if(--viewM<0){viewM=11;viewY--;} renderCal(); };
 $('#nextM').onclick=()=>{ if(++viewM>11){viewM=0;viewY++;} renderCal(); };
